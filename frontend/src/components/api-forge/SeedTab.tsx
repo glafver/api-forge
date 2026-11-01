@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Database, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,9 +52,25 @@ function randomValue(type: string): string {
     }
 }
 
+function defaultValue(type: string): string {
+    switch (type.toLowerCase()) {
+        case "int":
+            return "0";
+        case "double":
+            return "0";
+        case "bool":
+            return "false";
+        case "guid":
+            return "00000000-0000-0000-0000-000000000000";
+        default:
+            return "";
+    }
+}
+
 export default function SeedTab({ projectId }: SeedTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
+    const [selected, setSelected] = useState<Record<string, Set<string>>>({});
     const [loading, setLoading] = useState(true);
     const [seeding, setSeeding] = useState<Record<string, boolean>>({});
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -101,10 +118,13 @@ export default function SeedTab({ projectId }: SeedTabProps) {
                 }));
 
                 const initialCounts: Record<string, number> = {};
+                const initialSelected: Record<string, Set<string>> = {};
                 for (const resource of mapped) {
                     initialCounts[resource.id] = 10;
+                    initialSelected[resource.id] = new Set(resource.fields.map((field) => field.name));
                 }
                 setCounts(initialCounts);
+                setSelected(initialSelected);
                 setResources(mapped);
             } catch (error) {
                 toast.error(error instanceof Error ? error.message : "Failed to load resources");
@@ -117,8 +137,21 @@ export default function SeedTab({ projectId }: SeedTabProps) {
         fetchResources();
     }, [apiBase, projectId]);
 
+    const toggleField = (resourceId: string, fieldName: string) => {
+        setSelected((prev) => {
+            const next = new Set(prev[resourceId] ?? []);
+            if (next.has(fieldName)) {
+                next.delete(fieldName);
+            } else {
+                next.add(fieldName);
+            }
+            return { ...prev, [resourceId]: next };
+        });
+    };
+
     const seed = async (resource: Resource) => {
         const count = counts[resource.id] ?? 10;
+        const selectedFields = selected[resource.id] ?? new Set(resource.fields.map((field) => field.name));
         setSeeding((prev) => ({ ...prev, [resource.id]: true }));
 
         try {
@@ -127,7 +160,9 @@ export default function SeedTab({ projectId }: SeedTabProps) {
                 const body = {
                     recordFields: resource.fields.map((field) => ({
                         name: field.name,
-                        value: randomValue(field.type),
+                        value: selectedFields.has(field.name)
+                            ? randomValue(field.type)
+                            : defaultValue(field.type),
                     })),
                 };
 
@@ -196,49 +231,79 @@ export default function SeedTab({ projectId }: SeedTabProps) {
     return (
         <TabsContent value="seed" className="mt-4">
             <div className="space-y-4">
-                {resources.map((resource) => (
-                    <Card key={resource.id} className="overflow-hidden">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center gap-2 font-mono text-lg">
-                                <Database className="h-4 w-4 text-primary" />/{resource.name}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                                <div className="flex-1">
-                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                                        Number of records
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        min={1}
-                                        max={1000}
-                                        value={counts[resource.id] ?? 10}
-                                        onChange={(event) =>
-                                            setCounts((prev) => ({
-                                                ...prev,
-                                                [resource.id]: Number(event.target.value) || 1,
-                                            }))
-                                        }
-                                        className="max-w-[160px]"
-                                    />
+                {resources.map((resource) => {
+                    const selectedFields = selected[resource.id] ?? new Set(resource.fields.map((field) => field.name));
+
+                    return (
+                        <Card key={resource.id} className="overflow-hidden">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center gap-2 font-mono text-lg">
+                                    <Database className="h-4 w-4 text-primary" />/{resource.name}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {resource.fields.length > 0 && (
+                                    <div>
+                                        <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                                            Fields to generate
+                                        </label>
+                                        <div className="flex flex-wrap gap-x-5 gap-y-2">
+                                            {resource.fields.map((field) => (
+                                                <label
+                                                    key={field.name}
+                                                    className="flex cursor-pointer items-center gap-2 text-sm"
+                                                >
+                                                    <Checkbox
+                                                        checked={selectedFields.has(field.name)}
+                                                        onCheckedChange={() => toggleField(resource.id, field.name)}
+                                                    />
+                                                    <span className="font-mono">{field.name}</span>
+                                                    <span className="text-xs text-muted-foreground">{field.type}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Unchecked fields get a default value.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                                    <div className="flex-1">
+                                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                                            Number of records
+                                        </label>
+                                        <Input
+                                            type="number"
+                                            min={1}
+                                            max={1000}
+                                            value={counts[resource.id] ?? 10}
+                                            onChange={(event) =>
+                                                setCounts((prev) => ({
+                                                    ...prev,
+                                                    [resource.id]: Number(event.target.value) || 1,
+                                                }))
+                                            }
+                                            className="max-w-[160px]"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="secondary">
+                                            {selectedFields.size}/{resource.fields.length} fields
+                                        </Badge>
+                                        <Button
+                                            onClick={() => seed(resource)}
+                                            disabled={seeding[resource.id] || selectedFields.size === 0}
+                                        >
+                                            <Sparkles className="mr-2 h-4 w-4" />
+                                            {seeding[resource.id] ? "Seeding..." : "Generate"}
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="secondary">
-                                        {resource.fields.length} field{resource.fields.length === 1 ? "" : "s"}
-                                    </Badge>
-                                    <Button
-                                        onClick={() => seed(resource)}
-                                        disabled={seeding[resource.id]}
-                                    >
-                                        <Sparkles className="mr-2 h-4 w-4" />
-                                        {seeding[resource.id] ? "Seeding..." : "Generate"}
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
         </TabsContent>
     );

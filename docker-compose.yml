@@ -16,10 +16,10 @@ services:
       ConnectionStrings__DefaultConnection: >
         Server=${DB_SERVER}; Database=${DB_NAME}; User Id=${DB_ID}; Password=${DB_PASSWORD}; TrustServerCertificate=True; Encrypt=False
 
-    # volumes:
-    #   - frontend/dist:/app/wwwroot/
-    #   - backend/bin/Debug/net9.0:/app
-    #   - data-protection:/root/.aspnet/DataProtection-Keys
+    # Persist DataProtection keys so auth cookies survive container recreation
+    volumes:
+      - data-protection:/root/.aspnet/DataProtection-Keys
+
     depends_on:
       - apiForge-sqlserver
 
@@ -37,3 +37,4 @@ services:
 
 volumes:
   sqlserverdata:
+  data-protection:

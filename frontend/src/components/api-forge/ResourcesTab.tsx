@@ -21,7 +21,7 @@ interface ApiResource {
 interface ApiField {
     id: string;
     name: string;
-    data_type: "string" | "number" | "double";
+    data_type: FieldType;
     resource_id: string;
 }
 
@@ -45,12 +45,14 @@ interface ApiResourceResponse {
     fields?: ApiFieldResponse[];
 }
 
-type FieldType = "string" | "number" | "double";
+type FieldType = "string" | "int" | "double" | "bool" | "guid";
 
 const fieldTypeColors: Record<string, string> = {
     string: "bg-accent text-accent-foreground",
-    number: "bg-primary/10 text-primary",
+    int: "bg-primary/10 text-primary",
     double: "bg-warning/10 text-warning",
+    bool: "bg-emerald-500/10 text-emerald-600",
+    guid: "bg-purple-500/10 text-purple-600",
 };
 
 interface ResourcesTabProps {
@@ -440,6 +442,10 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="string">string</SelectItem>
+                                    <SelectItem value="int">int</SelectItem>
+                                    <SelectItem value="double">double</SelectItem>
+                                    <SelectItem value="bool">bool</SelectItem>
+                                    <SelectItem value="guid">guid</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

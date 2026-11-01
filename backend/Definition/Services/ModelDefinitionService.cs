@@ -29,6 +29,13 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
             );
         }
 
+        if (IsReservedModelName(dto.Name))
+        {
+            return OperationResult<ModelDefinitionResponseDto>.Failure(
+                new OperationError($"Model name '{dto.Name}' is reserved for built-in endpoints", 400)
+            );
+        }
+
         foreach (var field in dto.Fields)
         {
             if (!IsValidIdentifier(field.Name))
@@ -164,5 +171,12 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         if (string.IsNullOrWhiteSpace(name)) return false;
         if (!(char.IsAsciiLetter(name[0]) || name[0] == '_')) return false;
         return name.All(c => char.IsAsciiLetterOrDigit(c) || c == '_');
+    }
+
+    private static readonly string[] ReservedModelNames = ["user", "projects"];
+
+    private static bool IsReservedModelName(string name)
+    {
+        return ReservedModelNames.Contains(name, StringComparer.OrdinalIgnoreCase);
     }
 }

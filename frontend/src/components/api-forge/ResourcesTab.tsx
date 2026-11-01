@@ -55,7 +55,22 @@ const fieldTypeColors: Record<string, string> = {
     guid: "bg-purple-500/10 text-purple-600",
 };
 
-const isValidName = (name: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
+const RESERVED_NAMES = ["user", "projects"];
+
+const isReservedName = (name: string) =>
+    RESERVED_NAMES.includes(name.trim().toLowerCase());
+
+const isValidName = (name: string) =>
+    /^[A-Za-z_][A-Za-z0-9_]*$/.test(name.trim()) && !isReservedName(name);
+
+const nameError = (name: string): string | null => {
+    const trimmed = name.trim();
+    if (trimmed === "") return null;
+    if (isReservedName(trimmed)) return `"${trimmed}" is a reserved name`;
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(trimmed))
+        return "Only letters, digits and underscores (no spaces)";
+    return null;
+};
 
 interface ResourcesTabProps {
     projectId?: string;
@@ -78,15 +93,9 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
     const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
-    const resourceNameError =
-        newResourceName.trim() !== "" && !isValidName(newResourceName.trim())
-            ? "Only letters, digits and underscores (no spaces)"
-            : null;
+    const resourceNameError = nameError(newResourceName);
 
-    const fieldNameError =
-        addFieldName.trim() !== "" && !isValidName(addFieldName.trim())
-            ? "Only letters, digits and underscores (no spaces)"
-            : null;
+    const fieldNameError = nameError(addFieldName);
 
     const parseErrorMessage = async (response: Response) => {
         try {

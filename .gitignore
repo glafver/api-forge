@@ -20,5 +20,6 @@ backend/obj
 backend.Tests/bin
 backend.Tests/obj
 .env
+docker-compose.override.yml
 .env*
 data-protection/

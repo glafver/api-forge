@@ -1,3 +1,4 @@
+using System.Globalization;
 using backend.Definition.Entities;
 using backend.ModelRecord.Dto;
 
@@ -10,8 +11,8 @@ public static class RecordFieldsValidators
         return type.ToLower() switch
         {
             "string" => true,
-            "int" => int.TryParse(value, out _),
-            "double" => double.TryParse(value, out _),
+            "int" => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _),
+            "double" => double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out _),
             "bool" => bool.TryParse(value, out _),
             "guid" => Guid.TryParse(value, out _),
             _ => false

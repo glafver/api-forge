@@ -1,3 +1,4 @@
+using System.Globalization;
 using backend.ApiResponse.OperationResults;
 using backend.Data;
 using backend.Definition.Entities;
@@ -271,10 +272,12 @@ public class ModelRecordService : IModelRecordService
 
         return type switch
         {
-            "int" => long.TryParse(vx, out var ix) && long.TryParse(vy, out var iy)
+            "int" => long.TryParse(vx, NumberStyles.Integer, CultureInfo.InvariantCulture, out var ix)
+                && long.TryParse(vy, NumberStyles.Integer, CultureInfo.InvariantCulture, out var iy)
                 ? ix.CompareTo(iy)
                 : string.Compare(vx, vy, StringComparison.OrdinalIgnoreCase),
-            "double" => double.TryParse(vx, out var dx) && double.TryParse(vy, out var dy)
+            "double" => double.TryParse(vx, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var dx)
+                && double.TryParse(vy, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var dy)
                 ? dx.CompareTo(dy)
                 : string.Compare(vx, vy, StringComparison.OrdinalIgnoreCase),
             "bool" => bool.TryParse(vx, out var bx) && bool.TryParse(vy, out var by)

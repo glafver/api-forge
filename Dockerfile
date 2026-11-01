@@ -6,10 +6,10 @@ EXPOSE 8080
 # Build .NET app
 FROM mcr.microsoft.com/dotnet/sdk:9.0-noble AS build
 WORKDIR /src
-COPY ["backend/backend.csproj", "."]
-RUN dotnet restore "./backend.csproj"
+COPY ["backend/backend.csproj", "backend/"]
+RUN dotnet restore "backend/backend.csproj"
 COPY . .
-RUN dotnet publish "./backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "backend/backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Build frontend React app
 FROM node:20 AS frontend-build

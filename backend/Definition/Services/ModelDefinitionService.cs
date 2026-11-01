@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Definition.Service;
 
-public class ModelDefinitionService : IModelDefinitionService
+public class ModelDefinitionService : IModelDefinitionService, IDefinitionService
 {
     private readonly IDefinitionRepository repository;
     private readonly ApplicationDBContext dbContext;

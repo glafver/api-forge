@@ -15,6 +15,7 @@ builder.Services.ConfigureConnectionStringForEnv(builder.Configuration, builder.
 
 // Register Services
 builder.Services.AddScoped<IModelDefinitionService, ModelDefinitionService>();
+builder.Services.AddScoped<IDefinitionService, ModelDefinitionService>();
 builder.Services.AddScoped<IModelRecordService, ModelRecordService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();

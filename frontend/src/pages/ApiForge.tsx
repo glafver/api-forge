@@ -7,7 +7,7 @@ import { Database } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ApiTab, ResourcesTab, SeedTab } from "@/components/api-forge";
+import { ApiTab, DataTab, ResourcesTab, SeedTab } from "@/components/api-forge";
 
 interface Project {
   id: string;
@@ -25,7 +25,7 @@ export default function ApiForge() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"resources" | "api" | "seed">(
+  const [activeTab, setActiveTab] = useState<"resources" | "data" | "api" | "seed">(
     "resources",
   );
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -193,12 +193,15 @@ export default function ApiForge() {
           <Tabs
             value={activeTab}
             onValueChange={(value) =>
-              setActiveTab(value as "resources" | "api" | "seed")
+              setActiveTab(value as "resources" | "data" | "api" | "seed")
             }
           >
             <TabsList className="rounded-none inline-flex gap-2 border-b border-border bg-transparent p-0">
               <TabsTrigger value="resources" className={tabTriggerClass}>
                 Resources
+              </TabsTrigger>
+              <TabsTrigger value="data" className={tabTriggerClass}>
+                Data
               </TabsTrigger>
               <TabsTrigger value="api" className={tabTriggerClass}>
                 API
@@ -210,6 +213,7 @@ export default function ApiForge() {
 
             <ResourcesTab projectId={projectId} />
 
+            <DataTab projectId={projectId} />
             <ApiTab projectId={projectId} />
             <SeedTab projectId={projectId} />
           </Tabs>

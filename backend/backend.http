@@ -1,6 +1,41 @@
-@backend_HostAddress = http://localhost:5041
+@backend_HostAddress = http://localhost:8080
 
-GET {{backend_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a new user
+POST {{backend_HostAddress}}/api/user
+Content-Type: application/json
 
-###
+{
+  "username": "jane",
+  "email": "jane@example.com",
+  "password": "password123"
+}
+
+### Login (sets the access_token cookie)
+POST {{backend_HostAddress}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "password123"
+}
+
+### Get current user info
+GET {{backend_HostAddress}}/api/user/info
+
+### List my projects
+GET {{backend_HostAddress}}/api/projects
+
+### List definitions for a project (replace {projectId})
+GET {{backend_HostAddress}}/api/projects/{projectId}/definitions
+
+### List records for a model (replace {model})
+GET {{backend_HostAddress}}/api/{model}?page=1&pageSize=20
+
+### Create a record (replace {model})
+POST {{backend_HostAddress}}/api/{model}
+Content-Type: application/json
+
+{
+  "field1": "value1",
+  "field2": "value2"
+}

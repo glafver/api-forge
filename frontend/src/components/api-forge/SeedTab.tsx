@@ -35,6 +35,7 @@ interface Resource {
 
 interface SeedTabProps {
     projectId?: string;
+    refreshKey?: number;
 }
 
 function randomValue(type: string): string {
@@ -67,7 +68,7 @@ function defaultValue(type: string): string {
     }
 }
 
-export default function SeedTab({ projectId }: SeedTabProps) {
+export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
     const [selected, setSelected] = useState<Record<string, Set<string>>>({});
@@ -135,7 +136,7 @@ export default function SeedTab({ projectId }: SeedTabProps) {
         };
 
         fetchResources();
-    }, [apiBase, projectId]);
+    }, [apiBase, projectId, refreshKey]);
 
     const toggleField = (resourceId: string, fieldName: string) => {
         setSelected((prev) => {

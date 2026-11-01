@@ -46,9 +46,10 @@ interface RecordRow {
 
 interface DataTabProps {
     projectId?: string;
+    refreshKey?: number;
 }
 
-export default function DataTab({ projectId }: DataTabProps) {
+export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [records, setRecords] = useState<Record<string, RecordRow[]>>({});
     const [loading, setLoading] = useState(true);
@@ -133,7 +134,7 @@ export default function DataTab({ projectId }: DataTabProps) {
 
     useEffect(() => {
         load();
-    }, [load]);
+    }, [load, refreshKey]);
 
     const refresh = async () => {
         setRefreshing(true);

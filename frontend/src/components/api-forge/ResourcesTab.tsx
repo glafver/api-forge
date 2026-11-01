@@ -74,9 +74,10 @@ const nameError = (name: string): string | null => {
 
 interface ResourcesTabProps {
     projectId?: string;
+    onChanged?: () => void;
 }
 
-export default function ResourcesTab({ projectId }: ResourcesTabProps) {
+export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps) {
     const [resources, setResources] = useState<ApiResource[]>([]);
     const [fields, setFields] = useState<Record<string, ApiField[]>>({});
     const [loading, setLoading] = useState(true);
@@ -206,6 +207,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
             toast.success("Resource created");
             setCreateResourceOpen(false);
             setNewResourceName("");
+            onChanged?.();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to create resource");
         }
@@ -253,6 +255,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
             }));
             toast.success("Field added");
             setAddFieldOpen(false);
+            onChanged?.();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to add field");
         }
@@ -279,6 +282,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                 return next;
             });
             toast.success("Resource deleted");
+            onChanged?.();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete resource");
         }
@@ -306,6 +310,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                 [resourceId]: (prev[resourceId] || []).filter((field) => field.id !== fieldId),
             }));
             toast.success("Field deleted");
+            onChanged?.();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete field");
         }

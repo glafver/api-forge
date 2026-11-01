@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Database } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiTab, DataTab, ResourcesTab, SeedTab } from "@/components/api-forge";
 
@@ -25,10 +25,33 @@ export default function ApiForge() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"resources" | "data" | "api" | "seed">(
-    "resources",
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [resourcesRefreshKey, setResourcesRefreshKey] = useState(0);
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
+
+  const tabParam = searchParams.get("tab");
+  const activeTab =
+    tabParam === "data" || tabParam === "api" || tabParam === "seed"
+      ? tabParam
+      : "resources";
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const next = new URLSearchParams(searchParams);
+      if (value === "resources") {
+        next.delete("tab");
+      } else {
+        next.set("tab", value);
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const notifyResourcesChanged = useCallback(
+    () => setResourcesRefreshKey((key) => key + 1),
+    [],
+  );
 
   const parseErrorMessage = async (response: Response) => {
     try {
@@ -190,12 +213,7 @@ export default function ApiForge() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) =>
-              setActiveTab(value as "resources" | "data" | "api" | "seed")
-            }
-          >
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="rounded-none inline-flex gap-2 border-b border-border bg-transparent p-0">
               <TabsTrigger value="resources" className={tabTriggerClass}>
                 Resources
@@ -211,11 +229,11 @@ export default function ApiForge() {
               </TabsTrigger>
             </TabsList>
 
-            <ResourcesTab projectId={projectId} />
+            <ResourcesTab projectId={projectId} onChanged={notifyResourcesChanged} />
 
-            <DataTab projectId={projectId} />
-            <ApiTab projectId={projectId} />
-            <SeedTab projectId={projectId} />
+            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+            <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+            <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} />
           </Tabs>
         )}
       </motion.div>

@@ -33,6 +33,7 @@ interface Resource {
 
 interface ApiTabProps {
     projectId?: string;
+    refreshKey?: number;
 }
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
@@ -68,7 +69,7 @@ function buildExampleBody(fields: { name: string; type: string }[]) {
     };
 }
 
-export default function ApiTab({ projectId }: ApiTabProps) {
+export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -125,7 +126,7 @@ export default function ApiTab({ projectId }: ApiTabProps) {
         };
 
         fetchResources();
-    }, [apiBase, projectId]);
+    }, [apiBase, projectId, refreshKey]);
 
     const copy = async (text: string) => {
         try {

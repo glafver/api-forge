@@ -18,8 +18,6 @@ builder.Services.AddScoped<IModelDefinitionService, ModelDefinitionService>();
 builder.Services.AddScoped<IModelRecordService, ModelRecordService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProjectService, ProjectService>();
 
 
 
@@ -42,7 +40,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Location Ratings API v1"));
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiForge API v1"));
 }
 
 // Seed Roles

@@ -1,1 +1,5 @@
 **/obj/
+**/bin/
+backend.Tests/
+frontend/node_modules/
+frontend/dist/

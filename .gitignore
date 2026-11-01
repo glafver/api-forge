@@ -17,6 +17,8 @@ frontend/package-lock.json
 
 backend/bin
 backend/obj
+backend.Tests/bin
+backend.Tests/obj
 .env
 .env*
 data-protection/

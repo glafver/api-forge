@@ -21,18 +21,20 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setFormError("Passwords do not match");
       return;
     }
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      setFormError("Password must be at least 6 characters");
       return;
     }
     setLoading(true);
@@ -49,15 +51,19 @@ export default function Register() {
       });
 
       if (!response.ok) {
-        const message = await response.text();
-        toast.error(message || "Failed to create account");
+        const data = await response.json().catch(() => null);
+        const message =
+          (typeof data?.message === "string" && data.message) ||
+          (typeof data?.Message === "string" && data.Message) ||
+          "Failed to create account";
+        setFormError(message);
         return;
       }
 
       toast.success("Account created! You can now sign in.");
       navigate("/login");
     } catch (error) {
-      toast.error(
+      setFormError(
         error instanceof Error ? error.message : "Failed to create account",
       );
     } finally {
@@ -124,6 +130,9 @@ export default function Register() {
                   autoComplete="new-password"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  At least 6 characters
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -138,6 +147,9 @@ export default function Register() {
                   required
                 />
               </div>
+              {formError && (
+                <p className="text-sm font-medium text-destructive">{formError}</p>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Creating..." : "Create Account"}
               </Button>

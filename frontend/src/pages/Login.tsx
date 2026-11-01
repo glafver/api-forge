@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
-import { toast } from "sonner";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -21,13 +20,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     setLoading(true);
     const { error } = await signIn(email, password);
     if (error) {
-      toast.error(error);
+      setFormError(error);
     } else {
       navigate("/projects");
     }
@@ -76,6 +77,9 @@ export default function Login() {
                   required
                 />
               </div>
+              {formError && (
+                <p className="text-sm font-medium text-destructive">{formError}</p>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
               </Button>

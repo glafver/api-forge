@@ -44,6 +44,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiForge API v1"));
 }
 
+app.ApplyMigrationsOnRun();
+
 // Seed Roles
 using (var scope = app.Services.CreateScope())
 {
@@ -55,8 +57,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
-
-app.ApplyMigrationsOnRun();
 
 app.UseHttpsRedirection();
 app.UseDefaultFiles();

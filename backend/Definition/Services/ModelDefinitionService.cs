@@ -4,6 +4,7 @@ using backend.Definition.Dto;
 using backend.Definition.Entities;
 using backend.Definition.Factory;
 using backend.Definition.Repository;
+using backend.ModelRecord.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Definition.Service;
@@ -154,6 +155,26 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         try
         {
             await dbContext.Fields.AddAsync(field);
+
+            // Backfill existing records with an empty value for the new field,
+            // so older records stay consistent with the updated schema.
+            var recordIds = await dbContext.Records
+                .Where(r => r.ModelId == definitionId)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            foreach (var recordId in recordIds)
+            {
+                dbContext.FieldValues.Add(new FieldValueEntity
+                {
+                    Id = Guid.NewGuid(),
+                    FieldId = field.Id,
+                    RecordId = recordId,
+                    Name = dto.Name,
+                    Value = string.Empty
+                });
+            }
+
             await dbContext.SaveChangesAsync();
         }
         catch (DbUpdateException)

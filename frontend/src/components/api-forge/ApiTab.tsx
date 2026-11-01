@@ -72,6 +72,7 @@ export default function ApiTab({ projectId }: ApiTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
+    const apiOrigin = apiBase || window.location.origin;
 
     const parseErrorMessage = async (response: Response) => {
         try {
@@ -209,6 +210,11 @@ export default function ApiTab({ projectId }: ApiTabProps) {
 
     return (
         <TabsContent value="api" className="mt-4">
+            <p className="mb-3 text-xs text-muted-foreground">
+                Generated endpoints are served from{" "}
+                <span className="font-mono">{apiOrigin}/api/{"{model}"}</span> and
+                require authentication (your session cookie).
+            </p>
             <div className="space-y-4">
                 {resources.map((resource) => (
                     <Card key={resource.id} className="overflow-hidden">
@@ -220,8 +226,8 @@ export default function ApiTab({ projectId }: ApiTabProps) {
                         <CardContent className="space-y-2">
                             {endpoints(resource).map((endpoint) => {
                                 const curl = endpoint.body
-                                    ? `curl -X ${endpoint.method} '${apiBase}${endpoint.path}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(endpoint.body)}'`
-                                    : `curl -X ${endpoint.method} '${apiBase}${endpoint.path}'`;
+                                    ? `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(endpoint.body)}'`
+                                    : `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}'`;
 
                                 return (
                                     <div

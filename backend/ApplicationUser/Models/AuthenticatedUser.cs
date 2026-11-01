@@ -1,4 +1,4 @@
-using backend.ApplicationUser.Dto;
+using backend.ApplicationUser.Dtos;
 
 namespace backend.ApplicationUser.Models;
 

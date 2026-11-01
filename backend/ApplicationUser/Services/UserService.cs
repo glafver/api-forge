@@ -1,4 +1,3 @@
-using backend.ApplicationUser.Dto;
 using backend.ApplicationUser.Entities;
 using backend.ApplicationUser.Factory;
 using backend.ApiResponse.OperationResults;

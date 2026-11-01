@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace backend.ApplicationUser.Dto;
+namespace backend.ApplicationUser.Dtos;
 
 public record UserCreateDto(
     [Required, StringLength(50, MinimumLength = 2)]

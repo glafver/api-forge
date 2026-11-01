@@ -1,4 +1,3 @@
-using backend.ApplicationUser.Dto;
 using backend.ApiResponse.OperationResults;
 using backend.ApplicationUser.Models;
 using backend.ApplicationUser.Dtos;

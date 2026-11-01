@@ -1,4 +1,4 @@
-namespace backend.ApplicationUser.Dto;
+namespace backend.ApplicationUser.Dtos;
 
 public record AppUserDto(
     string Id,

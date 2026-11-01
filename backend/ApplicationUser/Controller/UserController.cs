@@ -1,4 +1,3 @@
-using backend.ApplicationUser.Dto;
 using backend.ApplicationUser.Entities;
 using backend.ApplicationUser.Services;
 using Microsoft.AspNetCore.Mvc;

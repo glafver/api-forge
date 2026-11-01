@@ -1,4 +1,4 @@
-using backend.ApplicationUser.Dto;
+using backend.ApplicationUser.Dtos;
 using backend.ApplicationUser.Entities;
 
 namespace backend.ApplicationUser.Factory;

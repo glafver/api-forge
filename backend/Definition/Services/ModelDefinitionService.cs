@@ -31,6 +31,16 @@ public class ModelDefinitionService : IModelDefinitionService
 
     public async Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(Guid projectId, ModelDefinitionCreateDto dto)
     {
+        // Model names map directly to the generated endpoint route (api/{name}),
+        // so they must be unique across the whole system.
+        var existing = await repository.FindAsync(e => e.Name == dto.Name);
+        if (existing is not null)
+        {
+            return OperationResult<ModelDefinitionResponseDto>.Failure(
+                new OperationError($"A model named '{dto.Name}' already exists", 409)
+            );
+        }
+
         var newModelDefinition = DefinitionFactory.FromModelDefinitionCreateDto(projectId, dto);
         var result = await repository.AddAsync(newModelDefinition);
 

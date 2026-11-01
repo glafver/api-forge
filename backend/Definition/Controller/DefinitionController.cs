@@ -1,12 +1,14 @@
 
 using backend.Definition.Dto;
 using backend.Definition.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Definition.Controller;
 
 
 [ApiController]
+[Authorize]
 [Route("api/define-models")]
 public class DefinitionController : ControllerBase
 {
@@ -41,7 +43,7 @@ public class DefinitionController : ControllerBase
         var result = await service.FindByNameAsync(modelName);
         if (result.IsSuccess && result.Data is ModelDefinitionResponseDto)
         {
-            return CreatedAtAction(nameof(GetByName), result.Data);
+            return Ok(result.Data);
         }
         else
         {

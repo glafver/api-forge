@@ -1,10 +1,12 @@
 using backend.Definition.Dto;
 using backend.Definition.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Definition.Controller;
 
 [ApiController]
+[Authorize]
 [Route("api/projects/{projectId:guid}/definitions")]
 public class ProjectDefinitionsController : ControllerBase
 {

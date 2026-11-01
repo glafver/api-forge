@@ -60,11 +60,12 @@ function exampleValue(type: string): unknown {
 }
 
 function buildExampleBody(fields: { name: string; type: string }[]) {
-    const body: Record<string, unknown> = {};
-    for (const field of fields) {
-        body[field.name] = exampleValue(field.type);
-    }
-    return body;
+    return {
+        recordFields: fields.map((field) => ({
+            name: field.name,
+            value: exampleValue(field.type),
+        })),
+    };
 }
 
 export default function ApiTab({ projectId }: ApiTabProps) {

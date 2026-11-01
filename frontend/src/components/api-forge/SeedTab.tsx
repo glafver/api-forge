@@ -124,10 +124,12 @@ export default function SeedTab({ projectId }: SeedTabProps) {
         try {
             let created = 0;
             for (let i = 0; i < count; i++) {
-                const body: Record<string, string> = {};
-                for (const field of resource.fields) {
-                    body[field.name] = randomValue(field.type);
-                }
+                const body = {
+                    recordFields: resource.fields.map((field) => ({
+                        name: field.name,
+                        value: randomValue(field.type),
+                    })),
+                };
 
                 const response = await fetch(`${apiBase}/api/${resource.name}`, {
                     method: "POST",

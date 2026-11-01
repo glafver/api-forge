@@ -52,7 +52,7 @@ public class UserController : ControllerBase
         var response = await _userService.LoginAsync(loginDto);
         if (!response.IsSuccess)
         {
-            return Unauthorized(response.Error);
+            return StatusCode(response.Error?.Status ?? StatusCodes.Status401Unauthorized, response.Error);
         }
 
         if (response.Data.JwtToken is string token && response.Data.User is AppUserDto)

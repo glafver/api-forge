@@ -55,7 +55,7 @@ const fieldTypeColors: Record<string, string> = {
     guid: "bg-purple-500/10 text-purple-600",
 };
 
-const RESERVED_NAMES = ["user", "projects"];
+const RESERVED_NAMES = ["definitions", "members", "invitations"];
 
 const isReservedName = (name: string) =>
     RESERVED_NAMES.includes(name.trim().toLowerCase());

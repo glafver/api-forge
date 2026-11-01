@@ -137,7 +137,7 @@ export default function ApiTab({ projectId }: ApiTabProps) {
     };
 
     const endpoints = (resource: Resource) => {
-        const base = `/api/${resource.name}`;
+        const base = `/api/projects/${projectId}/${resource.name}`;
         return [
             {
                 method: "GET" as Method,
@@ -212,7 +212,7 @@ export default function ApiTab({ projectId }: ApiTabProps) {
         <TabsContent value="api" className="mt-4">
             <p className="mb-3 text-xs text-muted-foreground">
                 Generated endpoints are served from{" "}
-                <span className="font-mono">{apiOrigin}/api/{"{model}"}</span> and
+                <span className="font-mono">{apiOrigin}/api/projects/{"{projectId}"}/{"{model}"}</span> and
                 require authentication (your session cookie).
             </p>
             <div className="space-y-4">

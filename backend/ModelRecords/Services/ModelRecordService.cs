@@ -33,9 +33,9 @@ public class ModelRecordService : IModelRecordService
         dbContext = applicationDbContext;
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> CreateAsync(string userId, CreateRecordFieldsDto dto, string modelName)
+    public async Task<OperationResult<ModelRecordResponseDto>> CreateAsync(string userId, Guid projectId, CreateRecordFieldsDto dto, string modelName)
     {
-        var model = await modelDefinitionService.GetModelByNameAsync(modelName);
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
         {
             return OperationResult<ModelRecordResponseDto>.Failure(new OperationError("Model not found", 404));
@@ -62,6 +62,7 @@ public class ModelRecordService : IModelRecordService
 
     public async Task<OperationResult<PagedRecordsResponseDto>> QueryRecordsAsync(
         string userId,
+        Guid projectId,
         string modelName,
         int page,
         int pageSize,
@@ -69,7 +70,7 @@ public class ModelRecordService : IModelRecordService
         string? sortOrder,
         IReadOnlyDictionary<string, string> filters)
     {
-        var model = await modelDefinitionService.GetModelByNameAsync(modelName);
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
         {
             return Failure<PagedRecordsResponseDto>("Model not found", 404);
@@ -136,9 +137,9 @@ public class ModelRecordService : IModelRecordService
             new PagedRecordsResponseDto(page, pageSize, totalCount, totalPages, pageItems));
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string userId, string modelName, Guid id)
+    public async Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string userId, Guid projectId, string modelName, Guid id)
     {
-        var model = await modelDefinitionService.GetModelByNameAsync(modelName);
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
         {
             return OperationResult<ModelRecordResponseDto>.Failure(new OperationError("Model not found", 404));
@@ -163,9 +164,9 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<ModelRecordResponseDto>.Success(ToResponse(record));
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string userId, string modelName, Guid id, CreateRecordFieldsDto dto)
+    public async Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string userId, Guid projectId, string modelName, Guid id, CreateRecordFieldsDto dto)
     {
-        var model = await modelDefinitionService.GetModelByNameAsync(modelName);
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
         {
             return OperationResult<ModelRecordResponseDto>.Failure(new OperationError("Model not found", 404));
@@ -202,9 +203,9 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<ModelRecordResponseDto>.Success(ToResponse(record));
     }
 
-    public async Task<OperationResult<bool>> DeleteRecordAsync(string userId, string modelName, Guid id)
+    public async Task<OperationResult<bool>> DeleteRecordAsync(string userId, Guid projectId, string modelName, Guid id)
     {
-        var model = await modelDefinitionService.GetModelByNameAsync(modelName);
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
         {
             return OperationResult<bool>.Failure(new OperationError("Model not found", 404));

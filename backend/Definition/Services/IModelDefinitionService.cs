@@ -4,5 +4,5 @@ namespace backend.Definition.Service;
 
 public interface IModelDefinitionService
 {
-    Task<ModelDefinitionEntity?> GetModelByNameAsync(string name);
+    Task<ModelDefinitionEntity?> GetModelByNameAsync(Guid projectId, string name);
 }

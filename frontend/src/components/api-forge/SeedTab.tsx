@@ -131,7 +131,7 @@ export default function SeedTab({ projectId }: SeedTabProps) {
                     })),
                 };
 
-                const response = await fetch(`${apiBase}/api/${resource.name}`, {
+                const response = await fetch(`${apiBase}/api/projects/${projectId}/${resource.name}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",

@@ -46,9 +46,9 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
             }
         }
 
-        // Model names map directly to the generated endpoint route (api/{name}),
-        // so they must be unique across the whole system.
-        var existing = await repository.FindAsync(e => e.Name == dto.Name);
+        // Model names map directly to the generated endpoint route (api/projects/{projectId}/{name}),
+        // so they must be unique within a project.
+        var existing = await repository.FindAsync(e => e.Name == dto.Name && e.ProjectId == projectId);
         if (existing is not null)
         {
             return OperationResult<ModelDefinitionResponseDto>.Failure(
@@ -68,9 +68,9 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         return OperationResult<ModelDefinitionResponseDto>.Success(response);
     }
 
-    public async Task<ModelDefinitionEntity?> GetModelByNameAsync(string name)
+    public async Task<ModelDefinitionEntity?> GetModelByNameAsync(Guid projectId, string name)
     {
-        return await repository.FindAsync(e => e.Name == name);
+        return await repository.FindAsync(e => e.Name == name && e.ProjectId == projectId);
     }
     public async Task<OperationResult<IEnumerable<ModelDefinitionResponseDto>>> ListByProjectAsync(Guid projectId)
     {
@@ -173,7 +173,7 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         return name.All(c => char.IsAsciiLetterOrDigit(c) || c == '_');
     }
 
-    private static readonly string[] ReservedModelNames = ["user", "projects"];
+    private static readonly string[] ReservedModelNames = ["definitions", "members", "invitations"];
 
     private static bool IsReservedModelName(string name)
     {

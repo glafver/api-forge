@@ -8,7 +8,7 @@ namespace backend.ModelRecord.Controller;
 
 [ApiController]
 [Authorize]
-[Route("api/{modelName}")]
+[Route("api/projects/{projectId:guid}/{modelName}")]
 public class ModelRecordsController : ControllerBase
 {
     private readonly IModelRecordService service;
@@ -19,7 +19,7 @@ public class ModelRecordsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateRecord(string modelName, [FromBody] CreateRecordFieldsDto dto)
+    public async Task<IActionResult> CreateRecord(Guid projectId, string modelName, [FromBody] CreateRecordFieldsDto dto)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -27,10 +27,10 @@ public class ModelRecordsController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await service.CreateAsync(userId, dto, modelName);
+        var result = await service.CreateAsync(userId, projectId, dto, modelName);
         if (result.IsSuccess && result.Data is not null)
         {
-            return Created($"/api/{modelName}/{result.Data.Id}", result.Data);
+            return Created($"/api/projects/{projectId}/{modelName}/{result.Data.Id}", result.Data);
         }
 
         return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -38,6 +38,7 @@ public class ModelRecordsController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetRecords(
+        Guid projectId,
         string modelName,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
@@ -62,7 +63,7 @@ public class ModelRecordsController : ControllerBase
             filters[query.Key] = query.Value.ToString();
         }
 
-        var result = await service.QueryRecordsAsync(userId, modelName, page, pageSize, sort, order, filters);
+        var result = await service.QueryRecordsAsync(userId, projectId, modelName, page, pageSize, sort, order, filters);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -72,7 +73,7 @@ public class ModelRecordsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetRecord(string modelName, Guid id)
+    public async Task<IActionResult> GetRecord(Guid projectId, string modelName, Guid id)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -80,7 +81,7 @@ public class ModelRecordsController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await service.GetRecordByIdAsync(userId, modelName, id);
+        var result = await service.GetRecordByIdAsync(userId, projectId, modelName, id);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -90,7 +91,7 @@ public class ModelRecordsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateRecord(string modelName, Guid id, [FromBody] CreateRecordFieldsDto dto)
+    public async Task<IActionResult> UpdateRecord(Guid projectId, string modelName, Guid id, [FromBody] CreateRecordFieldsDto dto)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -98,7 +99,7 @@ public class ModelRecordsController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await service.UpdateRecordAsync(userId, modelName, id, dto);
+        var result = await service.UpdateRecordAsync(userId, projectId, modelName, id, dto);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -108,7 +109,7 @@ public class ModelRecordsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteRecord(string modelName, Guid id)
+    public async Task<IActionResult> DeleteRecord(Guid projectId, string modelName, Guid id)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -116,7 +117,7 @@ public class ModelRecordsController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await service.DeleteRecordAsync(userId, modelName, id);
+        var result = await service.DeleteRecordAsync(userId, projectId, modelName, id);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);

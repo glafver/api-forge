@@ -37,7 +37,12 @@ public class ModelRecordsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetRecords(string modelName)
+    public async Task<IActionResult> GetRecords(
+        string modelName,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? sort = null,
+        [FromQuery] string? order = "asc")
     {
         var userId = GetUserId();
         if (userId is null)
@@ -45,7 +50,19 @@ public class ModelRecordsController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await service.GetAllRecordsByName(userId, modelName);
+        // Any query parameter that is not a reserved one is treated as a filter on that field.
+        var filters = new Dictionary<string, string>();
+        foreach (var query in Request.Query)
+        {
+            if (query.Key is "page" or "pageSize" or "sort" or "order")
+            {
+                continue;
+            }
+
+            filters[query.Key] = query.Value.ToString();
+        }
+
+        var result = await service.QueryRecordsAsync(userId, modelName, page, pageSize, sort, order, filters);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);

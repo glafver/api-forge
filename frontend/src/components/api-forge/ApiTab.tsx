@@ -140,7 +140,7 @@ export default function ApiTab({ projectId }: ApiTabProps) {
             {
                 method: "GET" as Method,
                 path: base,
-                description: "List all records",
+                description: "List records (?page, ?pageSize, ?sort, ?order, ?field=value)",
             },
             {
                 method: "POST" as Method,

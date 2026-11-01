@@ -55,6 +55,8 @@ const fieldTypeColors: Record<string, string> = {
     guid: "bg-purple-500/10 text-purple-600",
 };
 
+const isValidName = (name: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
+
 interface ResourcesTabProps {
     projectId?: string;
 }
@@ -75,6 +77,16 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
     const [confirmLabel, setConfirmLabel] = useState("Confirm");
     const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
+
+    const resourceNameError =
+        newResourceName.trim() !== "" && !isValidName(newResourceName.trim())
+            ? "Only letters, digits and underscores (no spaces)"
+            : null;
+
+    const fieldNameError =
+        addFieldName.trim() !== "" && !isValidName(addFieldName.trim())
+            ? "Only letters, digits and underscores (no spaces)"
+            : null;
 
     const parseErrorMessage = async (response: Response) => {
         try {
@@ -147,13 +159,15 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
     const handleCreateResource = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!projectId) return;
+        const name = newResourceName.trim();
+        if (!isValidName(name)) return;
         try {
             const response = await fetch(`${apiBase}/api/projects/${projectId}/definitions`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({
-                    name: newResourceName,
+                    name,
                     fields: [],
                 }),
             });
@@ -198,6 +212,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
         if (!projectId) return;
         const trimmedName = name.trim();
         if (!trimmedName) return;
+        if (!isValidName(trimmedName)) return;
 
         try {
             const response = await fetch(
@@ -312,8 +327,11 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                                         required
                                         className="font-mono"
                                     />
+                                    {resourceNameError && (
+                                        <p className="text-xs text-destructive">{resourceNameError}</p>
+                                    )}
                                 </div>
-                                <Button type="submit" className="w-full">
+                                <Button type="submit" className="w-full" disabled={!isValidName(newResourceName.trim())}>
                                     Create
                                 </Button>
                             </form>
@@ -433,6 +451,9 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                                 className="font-mono"
                                 required
                             />
+                            {fieldNameError && (
+                                <p className="text-xs text-destructive">{fieldNameError}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label>Data Type</Label>
@@ -449,7 +470,7 @@ export default function ResourcesTab({ projectId }: ResourcesTabProps) {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button type="submit" className="w-full" disabled={!addFieldResourceId}>
+                        <Button type="submit" className="w-full" disabled={!addFieldResourceId || !isValidName(addFieldName.trim())}>
                             Add Field
                         </Button>
                     </form>

@@ -22,6 +22,23 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
 
     public async Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(Guid projectId, ModelDefinitionCreateDto dto)
     {
+        if (!IsValidIdentifier(dto.Name))
+        {
+            return OperationResult<ModelDefinitionResponseDto>.Failure(
+                new OperationError("Model name can only contain letters, digits and underscores (no spaces), and must start with a letter or underscore", 400)
+            );
+        }
+
+        foreach (var field in dto.Fields)
+        {
+            if (!IsValidIdentifier(field.Name))
+            {
+                return OperationResult<ModelDefinitionResponseDto>.Failure(
+                    new OperationError($"Field name '{field.Name}' can only contain letters, digits and underscores (no spaces)", 400)
+                );
+            }
+        }
+
         // Model names map directly to the generated endpoint route (api/{name}),
         // so they must be unique across the whole system.
         var existing = await repository.FindAsync(e => e.Name == dto.Name);
@@ -112,6 +129,13 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
             return OperationResult<FieldDefinitionResponseDto>.Failure(new OperationError("Model not found", 404));
         }
 
+        if (!IsValidIdentifier(dto.Name))
+        {
+            return OperationResult<FieldDefinitionResponseDto>.Failure(
+                new OperationError("Field name can only contain letters, digits and underscores (no spaces), and must start with a letter or underscore", 400)
+            );
+        }
+
         var field = new FieldDefinitionEntity
         {
             Id = Guid.NewGuid(),
@@ -133,5 +157,12 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         return OperationResult<FieldDefinitionResponseDto>.Success(
             new FieldDefinitionResponseDto(field.Id, field.Name, field.Type)
         );
+    }
+
+    private static bool IsValidIdentifier(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        if (!(char.IsAsciiLetter(name[0]) || name[0] == '_')) return false;
+        return name.All(c => char.IsAsciiLetterOrDigit(c) || c == '_');
     }
 }

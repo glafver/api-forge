@@ -20,15 +20,6 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         dbContext = applicationDbContext;
     }
 
-    [Obsolete("Use CreateAsync(Guid projectId, ModelDefinitionCreateDto dto) instead.")]
-    public Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(ModelDefinitionCreateDto dto)
-    {
-        var result = OperationResult<ModelDefinitionResponseDto>.Failure(
-            new OperationError("ProjectId is required", 400)
-        );
-        return Task.FromResult(result);
-    }
-
     public async Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(Guid projectId, ModelDefinitionCreateDto dto)
     {
         // Model names map directly to the generated endpoint route (api/{name}),
@@ -51,21 +42,6 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
 
         var response = DefinitionFactory.FromModelDefinitionEntity(result);
         return OperationResult<ModelDefinitionResponseDto>.Success(response);
-    }
-
-    public async Task<OperationResult<ModelDefinitionResponseDto>> FindByNameAsync(string name)
-    {
-        var model = await repository.FindAsync(e => e.Name == name);
-
-        if (model is null)
-        {
-            return OperationResult<ModelDefinitionResponseDto>.Failure(new OperationError("Model not found", 404));
-        }
-        else
-        {
-            var response = DefinitionFactory.FromModelDefinitionEntity(model);
-            return OperationResult<ModelDefinitionResponseDto>.Success(response);
-        }
     }
 
     public async Task<ModelDefinitionEntity?> GetModelByNameAsync(string name)

@@ -2,14 +2,14 @@ using backend.ApplicationUser.Dto;
 using backend.ApiResponse.OperationResults;
 using backend.ApplicationUser.Models;
 using backend.ApplicationUser.Dtos;
-using backend.Service;
+
 namespace backend.ApplicationUser.Services;
 
-public interface IUserService : IService<AppUserDto>
+public interface IUserService
 {
     Task<OperationResult<AppUserDto>> CreateAsync(UserCreateDto dto);
+    Task<OperationResult<AppUserDto>> GetByIdAsync(string id);
     Task<OperationResult<AuthenticatedUser>> LoginAsync(UserLoginDto dto);
-
     Task<OperationResult<AppUserDto>> UpdateAsync(UserUpdateDto entity, string email);
     Task<OperationResult<PublicUserProfileDto>> GetPublicProfileAsync(string id);
     Task<OperationResult<IEnumerable<UserSearchDto>>> SearchUsersAsync(string query, int limit);

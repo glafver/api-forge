@@ -77,16 +77,6 @@ internal class UserService : IUserService
         return OperationResult<AppUserDto>.Failure(new OperationError(Message: "Registration failed", Status: 400));
     }
 
-    public Task<OperationResult<AppUserDto>> CreateAsync(AppUserDto entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<OperationResult<bool>> DeleteByIdAsync(Guid id)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<OperationResult<AppUserDto>> GetByIdAsync(string id)
     {
         var user = await userManager.FindByIdAsync(id);
@@ -96,11 +86,6 @@ internal class UserService : IUserService
         }
 
         return OperationResult<AppUserDto>.Success(MapToDto(user));
-    }
-
-    public Task<OperationResult<AppUserDto>> GetByName(string name)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<OperationResult<AuthenticatedUser>> LoginAsync(UserLoginDto dto)
@@ -137,11 +122,6 @@ internal class UserService : IUserService
         var authUser = new AuthenticatedUser(MapToDto(user), token);
         _logger.LogInformation("Login succeeded for {Email}", dto.Email);
         return OperationResult<AuthenticatedUser>.Success(authUser);
-    }
-
-    public Task<OperationResult<AppUserDto>> UpdateAsync(AppUserDto entity)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<OperationResult<AppUserDto>> UpdateAsync(UserUpdateDto entity, string email)

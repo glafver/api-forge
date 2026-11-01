@@ -1,10 +1,9 @@
 using backend.ApiResponse.OperationResults;
 using backend.Definition.Dto;
-using backend.Service;
 
 namespace backend.Definition.Service;
 
-public interface IDefinitionService : APIService<ModelDefinitionCreateDto, ModelDefinitionResponseDto>
+public interface IDefinitionService
 {
     Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(Guid projectId, ModelDefinitionCreateDto dto);
     Task<OperationResult<IEnumerable<ModelDefinitionResponseDto>>> ListByProjectAsync(Guid projectId);

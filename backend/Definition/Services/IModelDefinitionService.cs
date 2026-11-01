@@ -1,10 +1,8 @@
-using backend.Definition.Dto;
 using backend.Definition.Entities;
-using backend.Service;
 
 namespace backend.Definition.Service;
 
-public interface IModelDefinitionService : APIService<ModelDefinitionCreateDto, ModelDefinitionResponseDto>
+public interface IModelDefinitionService
 {
-    public Task<ModelDefinitionEntity?> GetModelByNameAsync(string name);
+    Task<ModelDefinitionEntity?> GetModelByNameAsync(string name);
 }

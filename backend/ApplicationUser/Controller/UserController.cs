@@ -55,8 +55,14 @@ public class UserController : ControllerBase
             return Unauthorized(response.Error);
         }
 
-        if (response.Data.JwtToken is string && response.Data.User is AppUserDto)
+        if (response.Data.JwtToken is string token && response.Data.User is AppUserDto)
         {
+            Response.Cookies.Append("access_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax
+            });
+
             return Ok(response.Data.User);
         }
 

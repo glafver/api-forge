@@ -5,7 +5,6 @@ namespace backend.ModelRecord.Validators;
 
 public static class RecordFieldsValidators
 {
-
     public static bool IsFieldValid(string value, string type)
     {
         return type.ToLower() switch
@@ -19,20 +18,33 @@ public static class RecordFieldsValidators
         };
     }
 
-    public static (bool isValid, string? missingField) HasAllFields(ModelDefinitionEntity entity, CreateRecordFieldsDto dto)
+    public static (bool isValid, string? error) ValidateFields(ModelDefinitionEntity entity, CreateRecordFieldsDto dto)
     {
+        // Ensure every field defined on the model is present and has a value of the correct type.
         foreach (var modelField in entity.Fields)
         {
-            var requiredField = dto.RecordFields.FirstOrDefault(f => f.Name == modelField.Name);
+            var providedField = dto.RecordFields.FirstOrDefault(f => f.Name == modelField.Name);
 
-            if (requiredField is null)
+            if (providedField is null)
             {
-                return (false, modelField.Name);
+                return (false, $"The field '{modelField.Name}' is missing");
             }
 
-            var valueString = requiredField.Value;
+            if (!IsFieldValid(providedField.Value, modelField.Type))
+            {
+                return (false, $"The field '{modelField.Name}' expects a value of type '{modelField.Type}'");
+            }
         }
+
+        // Reject fields that are not part of the model definition.
+        foreach (var providedField in dto.RecordFields)
+        {
+            if (!entity.Fields.Any(f => f.Name == providedField.Name))
+            {
+                return (false, $"The field '{providedField.Name}' is not defined for this model");
+            }
+        }
+
         return (true, null);
     }
-
 }

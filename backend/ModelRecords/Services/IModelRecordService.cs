@@ -1,11 +1,13 @@
 using backend.ApiResponse.OperationResults;
 using backend.ModelRecord.Dto;
-using backend.Service;
 
 namespace backend.ModelRecord.Service;
 
-public interface IModelRecordService : APIService<CreateRecordFieldsDto, ModelRecordResponseDto>
+public interface IModelRecordService
 {
-    public Task<OperationResult<ModelRecordResponseDto>> CreateAsync(CreateRecordFieldsDto dto, string modelId);
-    public Task<List<Dictionary<string, object>>> GetAllRecordsByName(string modelName);
+    Task<OperationResult<ModelRecordResponseDto>> CreateAsync(string userId, CreateRecordFieldsDto dto, string modelName);
+    Task<OperationResult<List<ModelRecordResponseDto>>> GetAllRecordsByName(string userId, string modelName);
+    Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string userId, string modelName, Guid id);
+    Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string userId, string modelName, Guid id, CreateRecordFieldsDto dto);
+    Task<OperationResult<bool>> DeleteRecordAsync(string userId, string modelName, Guid id);
 }

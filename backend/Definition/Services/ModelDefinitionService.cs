@@ -108,6 +108,11 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
 
         try
         {
+            // Delete the values that reference this field first (FieldValue.FieldId is Restrict).
+            await dbContext.FieldValues
+                .Where(value => value.FieldId == fieldId)
+                .ExecuteDeleteAsync();
+
             var deleted = await dbContext.Fields
                 .Where(field => field.Id == fieldId && field.ModelId == definitionId)
                 .ExecuteDeleteAsync();

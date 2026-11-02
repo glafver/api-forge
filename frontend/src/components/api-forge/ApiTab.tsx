@@ -193,6 +193,14 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                 },
             },
             {
+                method: "GET",
+                path: `${base}/{id}`,
+                help: {
+                    title: "Get a record by id",
+                    description: "Returns a single record. Replace {id} with the record's id.",
+                },
+            },
+            {
                 method: "POST",
                 path: base,
                 body: buildExampleBody(resource.fields),
@@ -200,14 +208,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                     title: "Create a record",
                     description:
                         "Creates a new record. The body is a recordFields array of { name, value } pairs — one entry per field.",
-                },
-            },
-            {
-                method: "GET",
-                path: `${base}/{id}`,
-                help: {
-                    title: "Get a record by id",
-                    description: "Returns a single record. Replace {id} with the record's id.",
                 },
             },
             {

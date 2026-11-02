@@ -236,6 +236,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
     const [seeding, setSeeding] = useState<Record<string, boolean>>({});
     const [prompt, setPrompt] = useState<Resource | null>(null);
     const [guideOpen, setGuideOpen] = useState(false);
+    const [reload, setReload] = useState(0);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
     const parseErrorMessage = async (response: Response) => {
@@ -335,7 +336,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
         if (active) {
             fetchResources();
         }
-    }, [active, apiBase, projectId, refreshKey]);
+    }, [active, apiBase, projectId, refreshKey, reload]);
 
     const toggleField = (resourceId: string, fieldName: string) => {
         setSelected((prev) => {
@@ -386,6 +387,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                 ...prev,
                 [resource.id]: (prev[resource.id] ?? 0) + created,
             }));
+            setReload((key) => key + 1);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Seeding failed");
         } finally {
@@ -455,6 +457,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                     ? `Nothing to fill in /${resource.name}`
                     : `Filled ${updated} record${updated === 1 ? "" : "s"} in /${resource.name}`,
             );
+            setReload((key) => key + 1);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to fill records");
         } finally {

@@ -55,7 +55,6 @@ interface EndpointHelp {
 interface Endpoint {
     method: Method;
     path: string;
-    description: string;
     body?: object;
     help: EndpointHelp;
 }
@@ -181,7 +180,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
             {
                 method: "GET",
                 path: base,
-                description: "List records",
                 help: {
                     title: "List records",
                     description: "Returns a paginated list of records for this resource.",
@@ -197,7 +195,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
             {
                 method: "POST",
                 path: base,
-                description: "Create a record",
                 body: buildExampleBody(resource.fields),
                 help: {
                     title: "Create a record",
@@ -208,7 +205,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
             {
                 method: "GET",
                 path: `${base}/{id}`,
-                description: "Get a record by id",
                 help: {
                     title: "Get a record by id",
                     description: "Returns a single record. Replace {id} with the record's id.",
@@ -217,7 +213,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
             {
                 method: "PUT",
                 path: `${base}/{id}`,
-                description: "Update a record",
                 body: buildExampleBody(resource.fields),
                 help: {
                     title: "Update a record",
@@ -228,7 +223,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
             {
                 method: "DELETE",
                 path: `${base}/{id}`,
-                description: "Delete a record",
                 help: {
                     title: "Delete a record",
                     description: "Deletes the record with the given id. Replace {id} with the record's id.",
@@ -338,9 +332,6 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                                                 </Badge>
                                                 <span className="truncate font-mono text-sm font-medium">
                                                     {endpoint.path}
-                                                </span>
-                                                <span className="hidden text-xs text-muted-foreground sm:inline">
-                                                    {endpoint.description}
                                                 </span>
                                                 <Popover>
                                                     <PopoverTrigger asChild>

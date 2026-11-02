@@ -233,7 +233,7 @@ export default function ApiForge() {
 
             <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
             <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} />
-            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "data"} />
           </Tabs>
         )}
       </motion.div>

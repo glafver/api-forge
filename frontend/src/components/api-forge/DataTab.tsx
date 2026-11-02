@@ -48,6 +48,7 @@ interface RecordRow {
 interface DataTabProps {
     projectId?: string;
     refreshKey?: number;
+    active?: boolean;
 }
 
 interface ConfirmTarget {
@@ -55,7 +56,7 @@ interface ConfirmTarget {
     recordId?: string;
 }
 
-export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
+export default function DataTab({ projectId, refreshKey = 0, active = true }: DataTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [records, setRecords] = useState<Record<string, RecordRow[]>>({});
     const [loading, setLoading] = useState(true);
@@ -140,8 +141,10 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
     }, [apiBase, projectId]);
 
     useEffect(() => {
-        load();
-    }, [load, refreshKey]);
+        if (active) {
+            load();
+        }
+    }, [active, load, refreshKey]);
 
     const refresh = async () => {
         setRefreshing(true);

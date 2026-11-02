@@ -21,8 +21,14 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         dbContext = applicationDbContext;
     }
 
-    public async Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(Guid projectId, ModelDefinitionCreateDto dto)
+    public async Task<OperationResult<ModelDefinitionResponseDto>> CreateAsync(string userId, Guid projectId, ModelDefinitionCreateDto dto)
     {
+        var accessError = await AuthorizeProjectAccessAsync(userId, projectId);
+        if (accessError is not null)
+        {
+            return OperationResult<ModelDefinitionResponseDto>.Failure(accessError);
+        }
+
         if (!IsValidIdentifier(dto.Name))
         {
             return OperationResult<ModelDefinitionResponseDto>.Failure(
@@ -73,15 +79,27 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
     {
         return await repository.FindAsync(e => e.Name == name && e.ProjectId == projectId);
     }
-    public async Task<OperationResult<IEnumerable<ModelDefinitionResponseDto>>> ListByProjectAsync(Guid projectId)
+    public async Task<OperationResult<IEnumerable<ModelDefinitionResponseDto>>> ListByProjectAsync(string userId, Guid projectId)
     {
+        var accessError = await AuthorizeProjectAccessAsync(userId, projectId);
+        if (accessError is not null)
+        {
+            return OperationResult<IEnumerable<ModelDefinitionResponseDto>>.Failure(accessError);
+        }
+
         var models = await repository.FindAllAsync(e => e.ProjectId == projectId);
         var response = models.Select(DefinitionFactory.FromModelDefinitionEntity).ToList();
         return OperationResult<IEnumerable<ModelDefinitionResponseDto>>.Success(response);
     }
 
-    public async Task<OperationResult<bool>> DeleteDefinitionAsync(Guid projectId, Guid definitionId)
+    public async Task<OperationResult<bool>> DeleteDefinitionAsync(string userId, Guid projectId, Guid definitionId)
     {
+        var accessError = await AuthorizeProjectAccessAsync(userId, projectId);
+        if (accessError is not null)
+        {
+            return OperationResult<bool>.Failure(accessError);
+        }
+
         try
         {
             var deleted = await repository.DeleteWhereAsync(e => e.Id == definitionId && e.ProjectId == projectId);
@@ -98,8 +116,14 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         }
     }
 
-    public async Task<OperationResult<bool>> DeleteFieldAsync(Guid projectId, Guid definitionId, Guid fieldId)
+    public async Task<OperationResult<bool>> DeleteFieldAsync(string userId, Guid projectId, Guid definitionId, Guid fieldId)
     {
+        var accessError = await AuthorizeProjectAccessAsync(userId, projectId);
+        if (accessError is not null)
+        {
+            return OperationResult<bool>.Failure(accessError);
+        }
+
         var model = await repository.FindAsync(e => e.Id == definitionId && e.ProjectId == projectId);
         if (model is null)
         {
@@ -131,11 +155,18 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
     }
 
     public async Task<OperationResult<FieldDefinitionResponseDto>> AddFieldAsync(
+        string userId,
         Guid projectId,
         Guid definitionId,
         FieldDefinitionCreateDto dto
     )
     {
+        var accessError = await AuthorizeProjectAccessAsync(userId, projectId);
+        if (accessError is not null)
+        {
+            return OperationResult<FieldDefinitionResponseDto>.Failure(accessError);
+        }
+
         var model = await repository.FindAsync(e => e.Id == definitionId && e.ProjectId == projectId);
         if (model is null)
         {
@@ -190,6 +221,19 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         return OperationResult<FieldDefinitionResponseDto>.Success(
             new FieldDefinitionResponseDto(field.Id, field.Name, field.Type)
         );
+    }
+
+    private async Task<OperationError?> AuthorizeProjectAccessAsync(string userId, Guid projectId)
+    {
+        var isMember = await dbContext.ProjectMembers
+            .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (!isMember)
+        {
+            return new OperationError("Forbidden", 403);
+        }
+
+        return null;
     }
 
     private static bool IsValidIdentifier(string name)

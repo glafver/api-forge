@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using backend.Definition.Dto;
 using backend.Definition.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,13 @@ public class ProjectDefinitionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ModelDefinitionResponseDto>>> List(Guid projectId)
     {
-        var result = await service.ListByProjectAsync(projectId);
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.ListByProjectAsync(userId, projectId);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -35,13 +42,19 @@ public class ProjectDefinitionsController : ControllerBase
     [ProducesResponseType(typeof(ModelDefinitionResponseDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<ModelDefinitionResponseDto>> Create(Guid projectId, [FromBody] ModelDefinitionCreateDto dto)
     {
-        var result = await service.CreateAsync(projectId, dto);
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.CreateAsync(userId, projectId, dto);
         if (result.IsSuccess && result.Data is ModelDefinitionResponseDto)
         {
             return CreatedAtAction(nameof(List), new { projectId }, result.Data);
         }
 
-        return BadRequest(result.Error);
+        return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
     }
 
     [HttpDelete("{definitionId:guid}")]
@@ -49,7 +62,13 @@ public class ProjectDefinitionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDefinition(Guid projectId, Guid definitionId)
     {
-        var result = await service.DeleteDefinitionAsync(projectId, definitionId);
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.DeleteDefinitionAsync(userId, projectId, definitionId);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -63,7 +82,13 @@ public class ProjectDefinitionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteField(Guid projectId, Guid definitionId, Guid fieldId)
     {
-        var result = await service.DeleteFieldAsync(projectId, definitionId, fieldId);
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.DeleteFieldAsync(userId, projectId, definitionId, fieldId);
         if (!result.IsSuccess)
         {
             return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
@@ -81,12 +106,23 @@ public class ProjectDefinitionsController : ControllerBase
         [FromBody] FieldDefinitionCreateDto dto
     )
     {
-        var result = await service.AddFieldAsync(projectId, definitionId, dto);
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.AddFieldAsync(userId, projectId, definitionId, dto);
         if (result.IsSuccess && result.Data is FieldDefinitionResponseDto)
         {
             return CreatedAtAction(nameof(List), new { projectId }, result.Data);
         }
 
-        return BadRequest(result.Error);
+        return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
+    }
+
+    private string? GetUserId()
+    {
+        return User.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 }

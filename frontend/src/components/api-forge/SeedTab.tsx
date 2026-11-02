@@ -75,6 +75,102 @@ function defaultValue(type: string): string {
     }
 }
 
+const FIRST_NAMES = [
+    "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry",
+    "Ivy", "Jack", "Karen", "Leo", "Mia", "Noah", "Olivia", "Peter",
+];
+const LAST_NAMES = [
+    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
+    "Davis", "Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Martin",
+];
+const PRODUCTS = [
+    "Wireless Mouse", "Mechanical Keyboard", "USB-C Charger", "Bluetooth Speaker",
+    "4K Monitor", "Noise-Cancelling Headphones", "Smart Watch", "Webcam",
+];
+const CITIES = [
+    "New York", "London", "Berlin", "Tokyo", "Paris", "Sydney", "Toronto",
+    "Amsterdam", "Madrid", "Rome",
+];
+const COUNTRIES = [
+    "USA", "Germany", "Japan", "France", "Canada", "Australia", "Spain", "Italy",
+];
+const COLORS = ["Red", "Blue", "Green", "Black", "White", "Yellow", "Purple", "Orange"];
+
+function pick<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function smartValue(name: string, type: string): string {
+    const n = name.toLowerCase();
+    const t = type.toLowerCase();
+
+    // IDs / UUIDs
+    if (n === "id" || n.endsWith("_id") || n.includes("uuid") || n.includes("guid")) {
+        return crypto.randomUUID();
+    }
+
+    // Contact info
+    if (n.includes("email") || n.includes("mail")) {
+        return `${pick(FIRST_NAMES).toLowerCase()}.${pick(LAST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}@example.com`;
+    }
+    if (n.includes("phone") || n.includes("mobile") || n.includes("tel")) {
+        return `+1-555-01${Math.floor(Math.random() * 90) + 10}`;
+    }
+
+    // Names
+    if (n.includes("first_name") || n.includes("firstname")) return pick(FIRST_NAMES);
+    if (n.includes("last_name") || n.includes("lastname") || n.includes("surname")) return pick(LAST_NAMES);
+    if (n === "name" || n.includes("full_name") || n.includes("fullname")) {
+        return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+    }
+    if (n.includes("username") || n.includes("login") || n.includes("nickname")) {
+        return `${pick(FIRST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}`;
+    }
+
+    // Money
+    if (n.includes("price") || n.includes("cost") || n.includes("amount") || n.includes("total") || n.includes("salary")) {
+        const value = Math.random() * 1000;
+        return t === "int" ? String(Math.round(value)) : value.toFixed(2);
+    }
+
+    // Products / items
+    if (n.includes("product") || n.includes("item") || n.includes("title") || n.includes("goods")) {
+        return pick(PRODUCTS);
+    }
+
+    // Counts and numbers
+    if (n.includes("quantity") || n.includes("qty") || n.includes("count") || n.includes("stock")) {
+        return String(Math.floor(Math.random() * 100) + 1);
+    }
+    if (n === "age") return String(Math.floor(Math.random() * 60) + 18);
+    if (n.includes("number") || n.includes("num") || n === "no") {
+        return String(Math.floor(Math.random() * 9000) + 1000);
+    }
+
+    // Dates
+    if (n.includes("date") || n.includes("created") || n.includes("updated") || n.includes("birthday") || n.includes("born")) {
+        const d = new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 3600 * 1000));
+        return d.toISOString().slice(0, 10);
+    }
+
+    // Web
+    if (n.includes("url") || n.includes("website") || n.includes("site") || n.includes("link")) {
+        return `https://example.com/${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    // Location
+    if (n.includes("city") || n.includes("town")) return pick(CITIES);
+    if (n.includes("country")) return pick(COUNTRIES);
+    if (n.includes("address") || n.includes("street")) return `${Math.floor(Math.random() * 999) + 1} ${pick(LAST_NAMES)} St.`;
+    if (n.includes("zip") || n.includes("postal") || n.includes("postcode")) return String(Math.floor(Math.random() * 90000) + 10000);
+
+    // Misc
+    if (n.includes("color") || n.includes("colour")) return pick(COLORS);
+
+    // Fall back to type-based random value
+    return randomValue(type);
+}
+
 export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
@@ -186,7 +282,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                     recordFields: resource.fields.map((field) => ({
                         name: field.name,
                         value: selectedFields.has(field.name)
-                            ? randomValue(field.type)
+                            ? smartValue(field.name, field.type)
                             : defaultValue(field.type),
                     })),
                 };
@@ -249,7 +345,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                 const recordFields = resource.fields.map((field) => {
                     let value = values[field.name] ?? "";
                     if (selectedFields.has(field.name) && value === "") {
-                        value = randomValue(field.type);
+                        value = smartValue(field.name, field.type);
                         changed = true;
                     }
                     return { name: field.name, value };

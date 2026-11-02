@@ -218,22 +218,22 @@ export default function ApiForge() {
               <TabsTrigger value="resources" className={tabTriggerClass}>
                 Resources
               </TabsTrigger>
-              <TabsTrigger value="data" className={tabTriggerClass}>
-                Data
-              </TabsTrigger>
               <TabsTrigger value="api" className={tabTriggerClass}>
                 API
               </TabsTrigger>
               <TabsTrigger value="seed" className={tabTriggerClass}>
                 Seed Data
               </TabsTrigger>
+              <TabsTrigger value="data" className={tabTriggerClass}>
+                Data
+              </TabsTrigger>
             </TabsList>
 
             <ResourcesTab projectId={projectId} onChanged={notifyResourcesChanged} />
 
-            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} />
             <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
             <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} />
           </Tabs>
         )}
       </motion.div>

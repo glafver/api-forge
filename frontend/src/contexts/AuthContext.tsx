@@ -7,6 +7,7 @@ import {
   ReactNode,
   useCallback,
 } from "react";
+import { DEMO_EMAIL } from "@/lib/demo";
 
 interface Profile {
   id: string;
@@ -20,6 +21,7 @@ interface Profile {
 interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
+  isDemo: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -160,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         profile,
         loading,
+        isDemo: profile?.email === DEMO_EMAIL,
         signIn,
         signOut,
         refreshProfile,

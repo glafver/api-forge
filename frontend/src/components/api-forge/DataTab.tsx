@@ -29,6 +29,7 @@ import {
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Database, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FieldResponse {
     Id?: string;
@@ -71,6 +72,7 @@ interface ConfirmTarget {
 }
 
 export default function DataTab({ projectId, refreshKey = 0, active = true }: DataTabProps) {
+    const { isDemo } = useAuth();
     const [resources, setResources] = useState<Resource[]>([]);
     const [records, setRecords] = useState<Record<string, RecordRow[]>>({});
     const [loading, setLoading] = useState(true);
@@ -286,7 +288,7 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                 </span>
                             </AccordionTrigger>
                             <AccordionContent className="px-4 pb-4">
-                                {rows.length > 0 && (
+                                {rows.length > 0 && !isDemo && (
                                     <div className="mb-2 flex justify-end">
                                         <Button
                                             variant="ghost"
@@ -314,7 +316,7 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                             {column}
                                                         </TableHead>
                                                     ))}
-                                                    <TableHead />
+                                                    {!isDemo && <TableHead />}
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -328,6 +330,7 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                                 {row.values[column] ?? ""}
                                                             </TableCell>
                                                         ))}
+                                                        {!isDemo && (
                                                         <TableCell className="text-right">
                                                             <div className="flex justify-end gap-1">
                                                                 <Button
@@ -348,6 +351,7 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                                 </Button>
                                                             </div>
                                                         </TableCell>
+                                                        )}
                                                     </TableRow>
                                                 ))}
                                             </TableBody>

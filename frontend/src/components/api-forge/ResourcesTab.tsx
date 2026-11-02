@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Layers, Plus, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 interface ApiResource {
     id: string;
     name: string;
@@ -78,6 +79,7 @@ interface ResourcesTabProps {
 }
 
 export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps) {
+    const { isDemo } = useAuth();
     const [resources, setResources] = useState<ApiResource[]>([]);
     const [fields, setFields] = useState<Record<string, ApiField[]>>({});
     const [loading, setLoading] = useState(true);
@@ -318,7 +320,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
 
     return (
         <TabsContent value="resources" className="mt-4">
-            {projectId && (
+            {projectId && !isDemo && (
                 <div className="mb-4 flex items-center justify-end">
                     <Dialog open={createResourceOpen} onOpenChange={setCreateResourceOpen}>
                         <DialogTrigger asChild>
@@ -377,6 +379,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                     <CardTitle className="flex items-center gap-2 text-lg font-mono">
                                         <Zap className="h-4 w-4 text-primary" />/{resource.name}
                                     </CardTitle>
+                                    {!isDemo && (
                                     <div className="flex gap-1">
                                         <Button
                                             variant="ghost"
@@ -401,6 +404,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                     </div>
+                                    )}
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -419,6 +423,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                         {field.data_type}
                                                     </Badge>
                                                 </div>
+                                                {!isDemo && (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -433,6 +438,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                                 </Button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

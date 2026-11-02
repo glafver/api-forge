@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Database, Info, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FieldResponse {
     Id?: string;
@@ -213,6 +214,7 @@ function smartValue(name: string, type: string): string {
 }
 
 export default function SeedTab({ projectId, refreshKey = 0, active = true }: SeedTabProps) {
+    const { isDemo } = useAuth();
     const [resources, setResources] = useState<Resource[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
     const [existingCounts, setExistingCounts] = useState<Record<string, number>>({});
@@ -570,6 +572,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                         <Badge variant="secondary">
                                             {selectedFields.size}/{resource.fields.length} fields
                                         </Badge>
+                                        {!isDemo && (
                                         <Button
                                             onClick={() => handleGenerate(resource)}
                                             disabled={seeding[resource.id]}
@@ -577,6 +580,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                             <Sparkles className="mr-2 h-4 w-4" />
                                             {seeding[resource.id] ? "Working..." : "Generate"}
                                         </Button>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>

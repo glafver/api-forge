@@ -53,7 +53,7 @@ interface UserSuggestion {
 }
 
 export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
-  const { profile: user } = useAuth();
+  const { profile: user, isDemo } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -687,7 +687,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
   };
 
   const canEditProject = (project: Project) => {
-    return view !== "member" && user?.id === project.owner_id;
+    return !isDemo && view !== "member" && user?.id === project.owner_id;
   };
 
   const openConfirm = (
@@ -714,7 +714,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
               Projects
             </h1>
           </div>
-          {view !== "member" && (
+          {view !== "member" && !isDemo && (
             <CreateProjectDialog
               open={createOpen}
               onOpenChange={setCreateOpen}

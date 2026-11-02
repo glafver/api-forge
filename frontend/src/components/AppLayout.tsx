@@ -29,7 +29,7 @@ const navItems = [
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, isDemo } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -303,7 +303,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto">
+        {isDemo && (
+          <div className="border-b border-border bg-amber-500/10 px-6 py-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+            Demo mode — read-only. Changes are disabled.
+          </div>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

@@ -13,12 +13,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
+import { DEMO_EMAIL, DEMO_PASSWORD } from "@/lib/demo";
 
 export default function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -89,6 +90,11 @@ export default function Login() {
               <Link to="/register" className="text-primary hover:underline">
                 Create one
               </Link>
+            </p>
+            <p className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-center text-xs text-muted-foreground">
+              Demo account:{" "}
+              <span className="font-mono">{DEMO_EMAIL}</span> ·{" "}
+              <span className="font-mono">{DEMO_PASSWORD}</span>
             </p>
           </CardContent>
         </Card>

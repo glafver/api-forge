@@ -1,6 +1,7 @@
 using backend.ApplicationUser.Services;
 using backend.Projects.Services;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 using backend.Definition.Repository;
 using backend.Definition.Service;
@@ -57,6 +58,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Seed the read-only demo account and its demo project.
+await DemoDataSeeder.SeedAsync(app.Services);
+
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
@@ -72,6 +76,29 @@ app.UseStaticFiles(new StaticFileOptions
 });
 app.UseRouting();
 app.UseAuthentication();
+
+// The demo account is read-only: reject any mutation (except login/logout).
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true
+        && context.Request.Path.StartsWithSegments("/api")
+        && context.Request.Method is "POST" or "PUT" or "PATCH" or "DELETE"
+        && !context.Request.Path.StartsWithSegments("/api/user/login")
+        && !context.Request.Path.StartsWithSegments("/api/user/logout"))
+    {
+        var email = context.User.FindFirstValue(ClaimTypes.Email)
+            ?? context.User.FindFirstValue("email");
+        if (string.Equals(email, DemoDataSeeder.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsJsonAsync(new { message = "The demo account is read-only." });
+            return;
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 app.MapControllers();
 app.MapFallback((context) =>

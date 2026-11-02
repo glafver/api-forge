@@ -234,7 +234,7 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
 
     return (
         <TabsContent value="api" className="mt-4">
-            <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+            <div className="mb-3 flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
                 <div className="min-w-0">
                     <p className="text-xs font-medium text-muted-foreground">
                         Developer key (shared, changes daily)
@@ -251,10 +251,22 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                     Copy
                 </Button>
             </div>
-            <p className="mb-3 text-xs text-muted-foreground">
-                Access the API without logging in by appending{" "}
-                <span className="font-mono">?key={"{your-key}"}</span> to any endpoint below.
-            </p>
+
+            <div className="mb-4 rounded-lg border p-3 text-xs text-muted-foreground">
+                <p className="mb-1 font-medium text-foreground">How to use</p>
+                <ol className="list-inside list-decimal space-y-0.5">
+                    <li>Copy the developer key above.</li>
+                    <li>
+                        Pick an endpoint below and press its copy button to get a ready{" "}
+                        <code className="font-mono">curl</code> command.
+                    </li>
+                    <li>
+                        Or call the URL directly and append{" "}
+                        <code className="font-mono">?key={"{"}your-key{"}"}</code>.
+                    </li>
+                </ol>
+            </div>
+
             <div className="space-y-4">
                 {resources.map((resource) => (
                     <Card key={resource.id} className="overflow-hidden">
@@ -265,34 +277,47 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {endpoints(resource).map((endpoint) => {
+                                const keyQuery = devKey ? `?key=${devKey}` : "";
                                 const curl = endpoint.body
-                                    ? `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(endpoint.body)}'`
-                                    : `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}'`;
+                                    ? `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}${keyQuery}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(endpoint.body)}'`
+                                    : `curl -X ${endpoint.method} '${apiOrigin}${endpoint.path}${keyQuery}'`;
 
                                 return (
                                     <div
                                         key={`${endpoint.method} ${endpoint.path}`}
-                                        className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 px-4 py-3"
+                                        className="rounded-lg border bg-muted/30"
                                     >
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <Badge variant="secondary" className={methodColors[endpoint.method]}>
-                                                {endpoint.method}
-                                            </Badge>
-                                            <span className="truncate font-mono text-sm font-medium">
-                                                {endpoint.path}
-                                            </span>
-                                            <span className="hidden text-xs text-muted-foreground sm:inline">
-                                                {endpoint.description}
-                                            </span>
+                                        <div className="flex items-center justify-between gap-3 px-4 py-3">
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                <Badge variant="secondary" className={methodColors[endpoint.method]}>
+                                                    {endpoint.method}
+                                                </Badge>
+                                                <span className="truncate font-mono text-sm font-medium">
+                                                    {endpoint.path}
+                                                </span>
+                                                <span className="hidden text-xs text-muted-foreground sm:inline">
+                                                    {endpoint.description}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 shrink-0"
+                                                onClick={() => copy(curl)}
+                                            >
+                                                <Copy className="h-3.5 w-3.5" />
+                                            </Button>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 shrink-0"
-                                            onClick={() => copy(curl)}
-                                        >
-                                            <Copy className="h-3.5 w-3.5" />
-                                        </Button>
+                                        {endpoint.body && (
+                                            <div className="border-t px-4 py-2">
+                                                <p className="mb-1 text-[11px] font-medium text-muted-foreground">
+                                                    Request body
+                                                </p>
+                                                <pre className="overflow-x-auto font-mono text-xs">
+                                                    {JSON.stringify(endpoint.body, null, 2)}
+                                                </pre>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

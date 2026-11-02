@@ -2,8 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
     Table,
     TableBody,
@@ -279,20 +285,22 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                     Refresh
                 </Button>
             </div>
-            <div className="space-y-4">
+            <Accordion type="multiple" className="space-y-2">
                 {resources.map((resource) => {
                     const rows = records[resource.id] ?? [];
                     const columns = resource.fields.map((field) => field.name);
 
                     return (
-                        <Card key={resource.id} className="overflow-hidden">
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2 font-mono text-lg">
-                                        <Database className="h-4 w-4 text-primary" />/{resource.name}
-                                        <Badge variant="secondary">{rows.length} record{rows.length === 1 ? "" : "s"}</Badge>
-                                    </CardTitle>
-                                    {rows.length > 0 && (
+                        <AccordionItem key={resource.id} value={resource.id} className="rounded-lg border bg-card">
+                            <AccordionTrigger className="px-4 py-3 no-underline hover:no-underline">
+                                <span className="flex items-center gap-2 font-mono text-base">
+                                    <Database className="h-4 w-4 text-primary" />/{resource.name}
+                                    <Badge variant="secondary">{rows.length} record{rows.length === 1 ? "" : "s"}</Badge>
+                                </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="px-4 pb-4">
+                                {rows.length > 0 && (
+                                    <div className="mb-2 flex justify-end">
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -302,10 +310,8 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                             <Trash2 className="mr-1 h-3.5 w-3.5" />
                                             Clear all
                                         </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
+                                    </div>
+                                )}
                                 {columns.length === 0 ? (
                                     <p className="text-sm text-muted-foreground">No fields defined yet.</p>
                                 ) : rows.length === 0 ? (
@@ -361,11 +367,11 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                         </Table>
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </AccordionContent>
+                        </AccordionItem>
                     );
                 })}
-            </div>
+            </Accordion>
 
             <ConfirmDialog
                 open={confirm !== null}

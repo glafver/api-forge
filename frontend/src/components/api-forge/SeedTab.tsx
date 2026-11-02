@@ -344,7 +344,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                 let changed = false;
                 const recordFields = resource.fields.map((field) => {
                     let value = values[field.name] ?? "";
-                    if (selectedFields.has(field.name) && value === "") {
+                    if (selectedFields.has(field.name) && (value === "" || value.startsWith("sample_"))) {
                         value = smartValue(field.name, field.type);
                         changed = true;
                     }
@@ -528,7 +528,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                                 if (resource) fillExisting(resource);
                             }}
                         >
-                            Fill empty fields in existing records
+                            Fill missing values in existing records
                         </Button>
                         <Button
                             variant="outline"

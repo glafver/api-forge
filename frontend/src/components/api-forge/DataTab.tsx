@@ -12,7 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Database, RefreshCw } from "lucide-react";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { Database, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface FieldResponse {
@@ -49,11 +50,17 @@ interface DataTabProps {
     refreshKey?: number;
 }
 
+interface ConfirmTarget {
+    resource: Resource;
+    recordId?: string;
+}
+
 export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [records, setRecords] = useState<Record<string, RecordRow[]>>({});
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [confirm, setConfirm] = useState<ConfirmTarget | null>(null);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
     const parseErrorMessage = async (response: Response) => {
@@ -142,6 +149,42 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
         setRefreshing(false);
     };
 
+    const deleteRecord = async (resource: Resource, recordId: string) => {
+        try {
+            const resp = await fetch(
+                `${apiBase}/api/projects/${projectId}/${resource.name}/${recordId}`,
+                { method: "DELETE", credentials: "include" },
+            );
+            if (!resp.ok) {
+                toast.error(await parseErrorMessage(resp));
+                return;
+            }
+            toast.success("Record deleted");
+            await load();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to delete record");
+        }
+    };
+
+    const clearAll = async (resource: Resource) => {
+        try {
+            const resp = await fetch(`${apiBase}/api/projects/${projectId}/${resource.name}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (!resp.ok) {
+                toast.error(await parseErrorMessage(resp));
+                return;
+            }
+            const data = await resp.json().catch(() => null);
+            const deleted = data?.deleted ?? 0;
+            toast.success(`Cleared ${deleted} record${deleted === 1 ? "" : "s"}`);
+            await load();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to clear records");
+        }
+    };
+
     if (!projectId) {
         return (
             <TabsContent value="data" className="mt-4">
@@ -197,10 +240,23 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
                     return (
                         <Card key={resource.id} className="overflow-hidden">
                             <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 font-mono text-lg">
-                                    <Database className="h-4 w-4 text-primary" />/{resource.name}
-                                    <Badge variant="secondary">{rows.length} record{rows.length === 1 ? "" : "s"}</Badge>
-                                </CardTitle>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="flex items-center gap-2 font-mono text-lg">
+                                        <Database className="h-4 w-4 text-primary" />/{resource.name}
+                                        <Badge variant="secondary">{rows.length} record{rows.length === 1 ? "" : "s"}</Badge>
+                                    </CardTitle>
+                                    {rows.length > 0 && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-destructive"
+                                            onClick={() => setConfirm({ resource })}
+                                        >
+                                            <Trash2 className="mr-1 h-3.5 w-3.5" />
+                                            Clear all
+                                        </Button>
+                                    )}
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 {columns.length === 0 ? (
@@ -218,6 +274,7 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
                                                             {column}
                                                         </TableHead>
                                                     ))}
+                                                    <TableHead />
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -231,6 +288,16 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
                                                                 {row.values[column] ?? ""}
                                                             </TableCell>
                                                         ))}
+                                                        <TableCell className="text-right">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-7 w-7"
+                                                                onClick={() => setConfirm({ resource, recordId: row.id })}
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                                            </Button>
+                                                        </TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -242,6 +309,34 @@ export default function DataTab({ projectId, refreshKey = 0 }: DataTabProps) {
                     );
                 })}
             </div>
+
+            <ConfirmDialog
+                open={confirm !== null}
+                title={
+                    confirm?.recordId
+                        ? "Delete this record?"
+                        : `Clear all records in /${confirm?.resource.name}?`
+                }
+                description={
+                    confirm?.recordId
+                        ? "This will permanently remove the record."
+                        : "This will permanently remove all records in this resource."
+                }
+                confirmLabel={confirm?.recordId ? "Delete" : "Clear all"}
+                confirmClassName="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onConfirm={() => {
+                    const target = confirm;
+                    setConfirm(null);
+                    if (target) {
+                        if (target.recordId) {
+                            deleteRecord(target.resource, target.recordId);
+                        } else {
+                            clearAll(target.resource);
+                        }
+                    }
+                }}
+                onOpenChange={(open) => !open && setConfirm(null)}
+            />
         </TabsContent>
     );
 }

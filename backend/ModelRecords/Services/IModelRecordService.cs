@@ -18,4 +18,5 @@ public interface IModelRecordService
     Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string userId, Guid projectId, string modelName, Guid id);
     Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string userId, Guid projectId, string modelName, Guid id, CreateRecordFieldsDto dto);
     Task<OperationResult<bool>> DeleteRecordAsync(string userId, Guid projectId, string modelName, Guid id);
+    Task<OperationResult<int>> DeleteAllRecordsAsync(string userId, Guid projectId, string modelName);
 }

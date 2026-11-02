@@ -229,6 +229,27 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<bool>.Success(true);
     }
 
+    public async Task<OperationResult<int>> DeleteAllRecordsAsync(string userId, Guid projectId, string modelName)
+    {
+        var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
+        if (model is null)
+        {
+            return OperationResult<int>.Failure(new OperationError("Model not found", 404));
+        }
+
+        var accessError = await AuthorizeModelAccessAsync(userId, model);
+        if (accessError is not null)
+        {
+            return OperationResult<int>.Failure(accessError);
+        }
+
+        var deleted = await dbContext.Records
+            .Where(r => r.ModelId == model.Id)
+            .ExecuteDeleteAsync();
+
+        return OperationResult<int>.Success(deleted);
+    }
+
     private async Task<OperationError?> AuthorizeModelAccessAsync(string userId, ModelDefinitionEntity model)
     {
         if (model.ProjectId is null)

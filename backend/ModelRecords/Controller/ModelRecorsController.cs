@@ -108,6 +108,24 @@ public class ModelRecordsController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAllRecords(Guid projectId, string modelName)
+    {
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.DeleteAllRecordsAsync(userId, projectId, modelName);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.Error?.Status ?? StatusCodes.Status400BadRequest, result.Error);
+        }
+
+        return Ok(new { deleted = result.Data });
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteRecord(Guid projectId, string modelName, Guid id)
     {

@@ -12,8 +12,16 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Database, RefreshCw, Trash2 } from "lucide-react";
+import { Database, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface FieldResponse {
@@ -62,6 +70,8 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [confirm, setConfirm] = useState<ConfirmTarget | null>(null);
+    const [editTarget, setEditTarget] = useState<{ resource: Resource; record: RecordRow } | null>(null);
+    const [editValues, setEditValues] = useState<Record<string, string>>({});
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
     const parseErrorMessage = async (response: Response) => {
@@ -188,6 +198,40 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
         }
     };
 
+    const openEdit = (resource: Resource, record: RecordRow) => {
+        setEditTarget({ resource, record });
+        setEditValues(record.values);
+    };
+
+    const saveEdit = async () => {
+        if (!editTarget) return;
+        const { resource, record } = editTarget;
+        try {
+            const recordFields = resource.fields.map((field) => ({
+                name: field.name,
+                value: editValues[field.name] ?? "",
+            }));
+            const resp = await fetch(
+                `${apiBase}/api/projects/${projectId}/${resource.name}/${record.id}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ recordFields }),
+                },
+            );
+            if (!resp.ok) {
+                toast.error(await parseErrorMessage(resp));
+                return;
+            }
+            toast.success("Record updated");
+            setEditTarget(null);
+            await load();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to update record");
+        }
+    };
+
     if (!projectId) {
         return (
             <TabsContent value="data" className="mt-4">
@@ -292,14 +336,24 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                             </TableCell>
                                                         ))}
                                                         <TableCell className="text-right">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-7 w-7"
-                                                                onClick={() => setConfirm({ resource, recordId: row.id })}
-                                                            >
-                                                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                                            </Button>
+                                                            <div className="flex justify-end gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7"
+                                                                    onClick={() => openEdit(resource, row)}
+                                                                >
+                                                                    <Pencil className="h-3.5 w-3.5" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7"
+                                                                    onClick={() => setConfirm({ resource, recordId: row.id })}
+                                                                >
+                                                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                                                </Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -340,6 +394,37 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                 }}
                 onOpenChange={(open) => !open && setConfirm(null)}
             />
+
+            <Dialog open={editTarget !== null} onOpenChange={(open) => !open && setEditTarget(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit record</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        {editTarget?.resource.fields.map((field) => (
+                            <div key={field.name} className="space-y-1.5">
+                                <Label className="font-mono text-xs">{field.name}</Label>
+                                <Input
+                                    value={editValues[field.name] ?? ""}
+                                    onChange={(event) =>
+                                        setEditValues((prev) => ({
+                                            ...prev,
+                                            [field.name]: event.target.value,
+                                        }))
+                                    }
+                                    className="font-mono text-sm"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setEditTarget(null)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={saveEdit}>Save</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </TabsContent>
     );
 }

@@ -188,7 +188,7 @@ function smartValue(name: string, type: string): string {
         }
 
         // Counts and numbers
-        if (n.includes("quantity") || n.includes("qty") || n.includes("count") || n.includes("stock")) {
+        if (n.includes("quantity") || n.includes("qty") || n === "count" || n.endsWith("_count") || n.includes("stock")) {
             return String(Math.floor(Math.random() * 100) + 1);
         }
         if (n === "age") return String(Math.floor(Math.random() * 60) + 18);

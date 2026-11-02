@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
-import { Copy, Zap } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Copy, Info, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface FieldResponse {
@@ -44,6 +45,20 @@ const methodColors: Record<Method, string> = {
     PUT: "bg-amber-500/15 text-amber-600",
     DELETE: "bg-destructive/15 text-destructive",
 };
+
+interface EndpointHelp {
+    title: string;
+    description: string;
+    params?: { name: string; desc: string }[];
+}
+
+interface Endpoint {
+    method: Method;
+    path: string;
+    description: string;
+    body?: object;
+    help: EndpointHelp;
+}
 
 function exampleValue(type: string): unknown {
     switch (type.toLowerCase()) {
@@ -160,35 +175,64 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
         }
     };
 
-    const endpoints = (resource: Resource) => {
+    const endpoints = (resource: Resource): Endpoint[] => {
         const base = `/api/projects/${projectId}/${resource.name}`;
         return [
             {
-                method: "GET" as Method,
+                method: "GET",
                 path: base,
-                description: "List records (?page, ?pageSize, ?sort, ?order, ?field=value)",
+                description: "List records",
+                help: {
+                    title: "List records",
+                    description: "Returns a paginated list of records for this resource.",
+                    params: [
+                        { name: "page", desc: "Page number (default: 1)" },
+                        { name: "pageSize", desc: "Records per page (default: 20)" },
+                        { name: "sort", desc: "Field name to sort by" },
+                        { name: "order", desc: `"asc" or "desc" (default: "asc")` },
+                        { name: "field=value", desc: "Filter: records where a field equals the value (repeatable)" },
+                    ],
+                },
             },
             {
-                method: "POST" as Method,
+                method: "POST",
                 path: base,
                 description: "Create a record",
                 body: buildExampleBody(resource.fields),
+                help: {
+                    title: "Create a record",
+                    description:
+                        "Creates a new record. The body is a recordFields array of { name, value } pairs — one entry per field.",
+                },
             },
             {
-                method: "GET" as Method,
+                method: "GET",
                 path: `${base}/{id}`,
                 description: "Get a record by id",
+                help: {
+                    title: "Get a record by id",
+                    description: "Returns a single record. Replace {id} with the record's id.",
+                },
             },
             {
-                method: "PUT" as Method,
+                method: "PUT",
                 path: `${base}/{id}`,
                 description: "Update a record",
                 body: buildExampleBody(resource.fields),
+                help: {
+                    title: "Update a record",
+                    description:
+                        "Updates an existing record. Replace {id} with the record's id and send the fields to change.",
+                },
             },
             {
-                method: "DELETE" as Method,
+                method: "DELETE",
                 path: `${base}/{id}`,
                 description: "Delete a record",
+                help: {
+                    title: "Delete a record",
+                    description: "Deletes the record with the given id. Replace {id} with the record's id.",
+                },
             },
         ];
     };
@@ -288,7 +332,7 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                                         className="rounded-lg border bg-muted/30"
                                     >
                                         <div className="flex items-center justify-between gap-3 px-4 py-3">
-                                            <div className="flex min-w-0 items-center gap-3">
+                                            <div className="flex min-w-0 items-center gap-2">
                                                 <Badge variant="secondary" className={methodColors[endpoint.method]}>
                                                     {endpoint.method}
                                                 </Badge>
@@ -298,6 +342,30 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
                                                 <span className="hidden text-xs text-muted-foreground sm:inline">
                                                     {endpoint.description}
                                                 </span>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                                        >
+                                                            <Info className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent align="start" sideOffset={8} className="w-80 text-xs">
+                                                        <p className="font-medium text-foreground">{endpoint.help.title}</p>
+                                                        <p className="mt-1 text-muted-foreground">{endpoint.help.description}</p>
+                                                        {endpoint.help.params && (
+                                                            <div className="mt-2 space-y-1.5 border-t pt-2">
+                                                                {endpoint.help.params.map((param) => (
+                                                                    <div key={param.name}>
+                                                                        <code className="font-mono text-foreground">{param.name}</code>
+                                                                        <span className="text-muted-foreground"> — {param.desc}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </PopoverContent>
+                                                </Popover>
                                             </div>
                                             <Button
                                                 variant="ghost"

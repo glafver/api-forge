@@ -6,6 +6,7 @@ namespace backend.Projects.Services;
 public interface IProjectService
 {
     Task<OperationResult<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string userId);
+    Task<OperationResult<string>> GetDevKeyAsync(string userId, Guid projectId);
     Task<OperationResult<ProjectDto>> CreateProjectAsync(string userId, CreateProjectDto dto);
     Task<OperationResult<ProjectDto>> UpdateProjectAsync(string userId, Guid projectId, UpdateProjectDto dto);
     Task<OperationResult<bool>> DeleteProjectAsync(string userId, Guid projectId);

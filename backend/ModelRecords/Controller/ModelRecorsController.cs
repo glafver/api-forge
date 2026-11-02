@@ -1,13 +1,12 @@
 using System.Security.Claims;
+using backend.AppConfig;
 using backend.ModelRecord.Dto;
 using backend.ModelRecord.Service;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.ModelRecord.Controller;
 
 [ApiController]
-[Authorize]
 [Route("api/projects/{projectId:guid}/{modelName}")]
 public class ModelRecordsController : ControllerBase
 {
@@ -22,7 +21,7 @@ public class ModelRecordsController : ControllerBase
     public async Task<IActionResult> CreateRecord(Guid projectId, string modelName, [FromBody] CreateRecordFieldsDto dto)
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -46,7 +45,7 @@ public class ModelRecordsController : ControllerBase
         [FromQuery] string? order = "asc")
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -55,7 +54,7 @@ public class ModelRecordsController : ControllerBase
         var filters = new Dictionary<string, string>();
         foreach (var query in Request.Query)
         {
-            if (query.Key is "page" or "pageSize" or "sort" or "order")
+            if (query.Key is "page" or "pageSize" or "sort" or "order" or "key")
             {
                 continue;
             }
@@ -76,7 +75,7 @@ public class ModelRecordsController : ControllerBase
     public async Task<IActionResult> GetRecord(Guid projectId, string modelName, Guid id)
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -94,7 +93,7 @@ public class ModelRecordsController : ControllerBase
     public async Task<IActionResult> UpdateRecord(Guid projectId, string modelName, Guid id, [FromBody] CreateRecordFieldsDto dto)
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -112,7 +111,7 @@ public class ModelRecordsController : ControllerBase
     public async Task<IActionResult> DeleteAllRecords(Guid projectId, string modelName)
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -130,7 +129,7 @@ public class ModelRecordsController : ControllerBase
     public async Task<IActionResult> DeleteRecord(Guid projectId, string modelName, Guid id)
     {
         var userId = GetUserId();
-        if (userId is null)
+        if (userId is null && !IsValidDevKey(projectId))
         {
             return Unauthorized();
         }
@@ -147,5 +146,16 @@ public class ModelRecordsController : ControllerBase
     private string? GetUserId()
     {
         return User.FindFirstValue(ClaimTypes.NameIdentifier);
+    }
+
+    private bool IsValidDevKey(Guid projectId)
+    {
+        var key = Request.Query["key"].FirstOrDefault();
+        if (string.IsNullOrEmpty(key))
+        {
+            return false;
+        }
+
+        return DevKeyGenerator.IsValid(key, projectId, DateTime.UtcNow);
     }
 }

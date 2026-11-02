@@ -37,6 +37,24 @@ public class ProjectsController : ControllerBase
         return Ok(response.Data);
     }
 
+    [HttpGet("{projectId:guid}/dev-key")]
+    public async Task<ActionResult> GetDevKey(Guid projectId)
+    {
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var response = await _projectService.GetDevKeyAsync(userId, projectId);
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.Error?.Status ?? StatusCodes.Status400BadRequest, response.Error);
+        }
+
+        return Ok(new { key = response.Data });
+    }
+
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> CreateProject([FromBody] CreateProjectDto dto)
     {

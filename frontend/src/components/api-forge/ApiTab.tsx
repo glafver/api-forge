@@ -72,6 +72,7 @@ function buildExampleBody(fields: { name: string; type: string }[]) {
 export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
+    const [devKey, setDevKey] = useState("");
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
     const apiOrigin = apiBase || window.location.origin;
 
@@ -127,6 +128,28 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
 
         fetchResources();
     }, [apiBase, projectId, refreshKey]);
+
+    useEffect(() => {
+        const fetchDevKey = async () => {
+            if (!projectId) {
+                setDevKey("");
+                return;
+            }
+            try {
+                const response = await fetch(`${apiBase}/api/projects/${projectId}/dev-key`, {
+                    credentials: "include",
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setDevKey(data.key ?? "");
+                }
+            } catch {
+                setDevKey("");
+            }
+        };
+
+        fetchDevKey();
+    }, [apiBase, projectId]);
 
     const copy = async (text: string) => {
         try {
@@ -211,10 +234,26 @@ export default function ApiTab({ projectId, refreshKey = 0 }: ApiTabProps) {
 
     return (
         <TabsContent value="api" className="mt-4">
+            <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+                <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">
+                        Developer key (shared, changes daily)
+                    </p>
+                    <p className="truncate font-mono text-sm">{devKey || "—"}</p>
+                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copy(devKey)}
+                    disabled={!devKey}
+                >
+                    <Copy className="mr-1 h-3.5 w-3.5" />
+                    Copy
+                </Button>
+            </div>
             <p className="mb-3 text-xs text-muted-foreground">
-                Generated endpoints are served from{" "}
-                <span className="font-mono">{apiOrigin}/api/projects/{"{projectId}"}/{"{model}"}</span> and
-                require authentication (your session cookie).
+                Access the API without logging in by appending{" "}
+                <span className="font-mono">?key={"{your-key}"}</span> to any endpoint below.
             </p>
             <div className="space-y-4">
                 {resources.map((resource) => (

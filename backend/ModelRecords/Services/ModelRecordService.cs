@@ -33,7 +33,7 @@ public class ModelRecordService : IModelRecordService
         dbContext = applicationDbContext;
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> CreateAsync(string userId, Guid projectId, CreateRecordFieldsDto dto, string modelName)
+    public async Task<OperationResult<ModelRecordResponseDto>> CreateAsync(string? userId, Guid projectId, CreateRecordFieldsDto dto, string modelName)
     {
         var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
@@ -61,7 +61,7 @@ public class ModelRecordService : IModelRecordService
     }
 
     public async Task<OperationResult<PagedRecordsResponseDto>> QueryRecordsAsync(
-        string userId,
+        string? userId,
         Guid projectId,
         string modelName,
         int page,
@@ -137,7 +137,7 @@ public class ModelRecordService : IModelRecordService
             new PagedRecordsResponseDto(page, pageSize, totalCount, totalPages, pageItems));
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string userId, Guid projectId, string modelName, Guid id)
+    public async Task<OperationResult<ModelRecordResponseDto>> GetRecordByIdAsync(string? userId, Guid projectId, string modelName, Guid id)
     {
         var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
@@ -164,7 +164,7 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<ModelRecordResponseDto>.Success(ToResponse(record));
     }
 
-    public async Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string userId, Guid projectId, string modelName, Guid id, CreateRecordFieldsDto dto)
+    public async Task<OperationResult<ModelRecordResponseDto>> UpdateRecordAsync(string? userId, Guid projectId, string modelName, Guid id, CreateRecordFieldsDto dto)
     {
         var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
@@ -214,7 +214,7 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<ModelRecordResponseDto>.Success(ToResponse(record));
     }
 
-    public async Task<OperationResult<bool>> DeleteRecordAsync(string userId, Guid projectId, string modelName, Guid id)
+    public async Task<OperationResult<bool>> DeleteRecordAsync(string? userId, Guid projectId, string modelName, Guid id)
     {
         var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
@@ -240,7 +240,7 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<bool>.Success(true);
     }
 
-    public async Task<OperationResult<int>> DeleteAllRecordsAsync(string userId, Guid projectId, string modelName)
+    public async Task<OperationResult<int>> DeleteAllRecordsAsync(string? userId, Guid projectId, string modelName)
     {
         var model = await modelDefinitionService.GetModelByNameAsync(projectId, modelName);
         if (model is null)
@@ -261,11 +261,17 @@ public class ModelRecordService : IModelRecordService
         return OperationResult<int>.Success(deleted);
     }
 
-    private async Task<OperationError?> AuthorizeModelAccessAsync(string userId, ModelDefinitionEntity model)
+    private async Task<OperationError?> AuthorizeModelAccessAsync(string? userId, ModelDefinitionEntity model)
     {
         if (model.ProjectId is null)
         {
             return new OperationError("Model is not associated with a project", 404);
+        }
+
+        // Key-based access (userId is null) has already been validated in the controller.
+        if (userId is null)
+        {
+            return null;
         }
 
         var isMember = await dbContext.ProjectMembers

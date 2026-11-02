@@ -1,5 +1,6 @@
 using backend.ApiResponse.OperationResults;
 using backend.ApplicationUser.Entities;
+using backend.AppConfig;
 using backend.Data;
 using backend.Projects.Dtos;
 using backend.Projects.Entities;
@@ -34,6 +35,25 @@ internal class ProjectService : IProjectService
             .ToListAsync();
 
         return OperationResult<IEnumerable<ProjectDto>>.Success(projects);
+    }
+
+    public async Task<OperationResult<string>> GetDevKeyAsync(string userId, Guid projectId)
+    {
+        var project = await _dbContext.Projects
+            .Include(p => p.Members)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+
+        if (project is null)
+        {
+            return Failure<string>("Project not found", StatusCodes.Status404NotFound);
+        }
+
+        if (!IsMember(project, userId))
+        {
+            return Failure<string>("Forbidden", StatusCodes.Status403Forbidden);
+        }
+
+        return OperationResult<string>.Success(DevKeyGenerator.Generate(projectId, DateTime.UtcNow));
     }
 
     public async Task<OperationResult<ProjectDto>> CreateProjectAsync(string userId, CreateProjectDto dto)

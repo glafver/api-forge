@@ -69,21 +69,6 @@ function randomValue(type: string): string {
     }
 }
 
-function defaultValue(type: string): string {
-    switch (type.toLowerCase()) {
-        case "int":
-            return "0";
-        case "double":
-            return "0";
-        case "bool":
-            return "false";
-        case "guid":
-            return "00000000-0000-0000-0000-000000000000";
-        default:
-            return "";
-    }
-}
-
 const FIRST_NAMES = [
     "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry",
     "Ivy", "Jack", "Karen", "Leo", "Mia", "Noah", "Olivia", "Peter",
@@ -352,7 +337,6 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
 
     const seedNew = async (resource: Resource) => {
         const count = counts[resource.id] ?? 10;
-        const selectedFields = selected[resource.id] ?? new Set(resource.fields.map((field) => field.name));
         setSeeding((prev) => ({ ...prev, [resource.id]: true }));
 
         try {
@@ -361,9 +345,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                 const body = {
                     recordFields: resource.fields.map((field) => ({
                         name: field.name,
-                        value: selectedFields.has(field.name)
-                            ? smartValue(field.name, field.type)
-                            : defaultValue(field.type),
+                        value: smartValue(field.name, field.type),
                     })),
                 };
 
@@ -466,7 +448,8 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
     };
 
     const handleGenerate = (resource: Resource) => {
-        if ((existingCounts[resource.id] ?? 0) > 0) {
+        const selectedFields = selected[resource.id] ?? new Set();
+        if (selectedFields.size > 0 && (existingCounts[resource.id] ?? 0) > 0) {
             setPrompt(resource);
         } else {
             seedNew(resource);
@@ -541,7 +524,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                 {resource.fields.length > 0 && (
                                     <div>
                                         <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                                            Fields to generate
+                                            Fields to fill
                                         </label>
                                         <div className="flex flex-wrap gap-x-5 gap-y-2">
                                             {resource.fields.map((field) => (
@@ -559,7 +542,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                             ))}
                                         </div>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Unchecked fields get a default value.
+                                            Only checked fields will be filled.
                                         </p>
                                     </div>
                                 )}
@@ -589,7 +572,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                         </Badge>
                                         <Button
                                             onClick={() => handleGenerate(resource)}
-                                            disabled={seeding[resource.id] || selectedFields.size === 0}
+                                            disabled={seeding[resource.id]}
                                         >
                                             <Sparkles className="mr-2 h-4 w-4" />
                                             {seeding[resource.id] ? "Working..." : "Generate"}
@@ -621,6 +604,7 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                 if (resource) fillExisting(resource);
                             }}
                         >
+                            <Sparkles className="mr-2 h-4 w-4" />
                             Fill missing values in existing records
                         </Button>
                         <Button
@@ -631,7 +615,6 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                 if (resource) seedNew(resource);
                             }}
                         >
-                            <Sparkles className="mr-2 h-4 w-4" />
                             Create new records
                         </Button>
                     </div>

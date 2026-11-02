@@ -289,12 +289,32 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
 
                     try {
                         const recResp = await fetch(
-                            `${apiBase}/api/projects/${projectId}/${resource.name}?page=1&pageSize=1`,
+                            `${apiBase}/api/projects/${projectId}/${resource.name}?page=1&pageSize=100`,
                             { credentials: "include" },
                         );
                         if (recResp.ok) {
                             const recData = await recResp.json();
-                            initialExisting[resource.id] = recData.totalCount ?? 0;
+                            const items = (recData.items ?? []) as {
+                                fields?: { name: string; value: string }[];
+                            }[];
+                            initialExisting[resource.id] = recData.totalCount ?? items.length;
+
+                            // Pre-select only fields that have no value yet in existing records.
+                            if (items.length > 0) {
+                                const filledFields = new Set<string>();
+                                for (const item of items) {
+                                    for (const field of item.fields ?? []) {
+                                        if (field.value !== "" && !field.value.startsWith("sample_")) {
+                                            filledFields.add(field.name);
+                                        }
+                                    }
+                                }
+                                initialSelected[resource.id] = new Set(
+                                    resource.fields
+                                        .map((field) => field.name)
+                                        .filter((name) => !filledFields.has(name)),
+                                );
+                            }
                         }
                     } catch {
                         initialExisting[resource.id] = 0;

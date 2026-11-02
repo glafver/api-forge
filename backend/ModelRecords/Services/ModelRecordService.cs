@@ -193,10 +193,21 @@ public class ModelRecordService : IModelRecordService
             return OperationResult<ModelRecordResponseDto>.Failure(new OperationError("Record not found", 404));
         }
 
-        // Replace existing values with the new set. The old values are deleted first so
-        // the FieldValue rows for this record are fully refreshed.
-        dbContext.FieldValues.RemoveRange(record.Values);
-        record.Values = CreateFieldValuesForModelDefinition(dto, model, record.Id);
+        // Update existing field values in place and add any that are missing.
+        foreach (var fieldDto in dto.RecordFields)
+        {
+            var existing = record.Values.FirstOrDefault(v => v.Name == fieldDto.Name);
+            if (existing is not null)
+            {
+                existing.Value = fieldDto.Value;
+            }
+            else
+            {
+                var fieldDefinition = model.Fields.FirstOrDefault(f => f.Name == fieldDto.Name);
+                if (fieldDefinition is null) continue;
+                record.Values.Add(CreateFieldValue(fieldDto.Value, fieldDto.Name, fieldDefinition.Id, record.Id));
+            }
+        }
 
         await dbContext.SaveChangesAsync();
 

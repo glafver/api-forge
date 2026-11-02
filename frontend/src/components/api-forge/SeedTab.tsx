@@ -572,15 +572,13 @@ export default function SeedTab({ projectId, refreshKey = 0, active = true }: Se
                                         <Badge variant="secondary">
                                             {selectedFields.size}/{resource.fields.length} fields
                                         </Badge>
-                                        {!isDemo && (
                                         <Button
                                             onClick={() => handleGenerate(resource)}
-                                            disabled={seeding[resource.id]}
+                                            disabled={seeding[resource.id] || isDemo}
                                         >
                                             <Sparkles className="mr-2 h-4 w-4" />
                                             {seeding[resource.id] ? "Working..." : "Generate"}
                                         </Button>
-                                        )}
                                     </div>
                                 </div>
                             </CardContent>

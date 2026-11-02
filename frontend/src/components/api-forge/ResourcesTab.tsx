@@ -320,11 +320,11 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
 
     return (
         <TabsContent value="resources" className="mt-4">
-            {projectId && !isDemo && (
+            {projectId && (
                 <div className="mb-4 flex items-center justify-end">
                     <Dialog open={createResourceOpen} onOpenChange={setCreateResourceOpen}>
                         <DialogTrigger asChild>
-                            <Button>
+                            <Button disabled={isDemo}>
                                 <Plus className="mr-2 h-4 w-4" />
                                 New Resource
                             </Button>
@@ -379,11 +379,11 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                     <CardTitle className="flex items-center gap-2 text-lg font-mono">
                                         <Zap className="h-4 w-4 text-primary" />/{resource.name}
                                     </CardTitle>
-                                    {!isDemo && (
                                     <div className="flex gap-1">
                                         <Button
                                             variant="ghost"
                                             size="sm"
+                                            disabled={isDemo}
                                             onClick={() => openAddFieldDialog(resource.id)}
                                         >
                                             <Plus className="mr-1 h-3.5 w-3.5" />
@@ -393,6 +393,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8"
+                                            disabled={isDemo}
                                             onClick={() => {
                                                 setConfirmTitle(`Delete /${resource.name}?`);
                                                 setConfirmDescription("This will permanently remove the resource.");
@@ -404,7 +405,6 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                         </Button>
                                     </div>
-                                    )}
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -423,11 +423,11 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                         {field.data_type}
                                                     </Badge>
                                                 </div>
-                                                {!isDemo && (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-7 w-7"
+                                                    disabled={isDemo}
                                                     onClick={() => {
                                                         setConfirmTitle(`Delete field ${field.name}?`);
                                                         setConfirmDescription("This will permanently remove the field.");
@@ -438,7 +438,6 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                                 </Button>
-                                                )}
                                             </div>
                                         ))}
                                     </div>

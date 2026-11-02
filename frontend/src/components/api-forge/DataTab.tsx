@@ -288,12 +288,13 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                 </span>
                             </AccordionTrigger>
                             <AccordionContent className="px-4 pb-4">
-                                {rows.length > 0 && !isDemo && (
+                                {rows.length > 0 && (
                                     <div className="mb-2 flex justify-end">
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="text-destructive"
+                                            disabled={isDemo}
                                             onClick={() => setConfirm({ resource })}
                                         >
                                             <Trash2 className="mr-1 h-3.5 w-3.5" />
@@ -316,7 +317,7 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                             {column}
                                                         </TableHead>
                                                     ))}
-                                                    {!isDemo && <TableHead />}
+                                                    <TableHead />
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -330,13 +331,13 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                                 {row.values[column] ?? ""}
                                                             </TableCell>
                                                         ))}
-                                                        {!isDemo && (
                                                         <TableCell className="text-right">
                                                             <div className="flex justify-end gap-1">
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     className="h-7 w-7"
+                                                                    disabled={isDemo}
                                                                     onClick={() => openEdit(resource, row)}
                                                                 >
                                                                     <Pencil className="h-3.5 w-3.5" />
@@ -345,13 +346,13 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     className="h-7 w-7"
+                                                                    disabled={isDemo}
                                                                     onClick={() => setConfirm({ resource, recordId: row.id })}
                                                                 >
                                                                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                                                 </Button>
                                                             </div>
                                                         </TableCell>
-                                                        )}
                                                     </TableRow>
                                                 ))}
                                             </TableBody>

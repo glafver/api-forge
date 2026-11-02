@@ -13,6 +13,7 @@ interface Project {
 interface ProjectCardProps {
     project: Project;
     canEdit: boolean;
+    readOnly?: boolean;
     onEdit: () => void;
     onDelete: () => void;
     onMembers: () => void;
@@ -24,6 +25,7 @@ interface ProjectCardProps {
 export default function ProjectCard({
     project,
     canEdit,
+    readOnly,
     onEdit,
     onDelete,
     onMembers,
@@ -43,6 +45,7 @@ export default function ProjectCard({
                                 variant="ghost"
                                 size="sm"
                                 className="opacity-0 transition-opacity group-hover:opacity-100"
+                                disabled={readOnly}
                                 onClick={onLeave}
                             >
                                 <LogOut className="mr-1.5 h-3.5 w-3.5" />
@@ -55,6 +58,7 @@ export default function ProjectCard({
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
+                                    disabled={readOnly}
                                     onClick={onEdit}
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
@@ -63,6 +67,7 @@ export default function ProjectCard({
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
+                                    disabled={readOnly}
                                     onClick={onDelete}
                                 >
                                     <Trash2 className="h-3.5 w-3.5 text-destructive" />

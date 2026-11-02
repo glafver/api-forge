@@ -687,7 +687,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
   };
 
   const canEditProject = (project: Project) => {
-    return !isDemo && view !== "member" && user?.id === project.owner_id;
+    return view !== "member" && user?.id === project.owner_id;
   };
 
   const openConfirm = (
@@ -714,13 +714,14 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
               Projects
             </h1>
           </div>
-          {view !== "member" && !isDemo && (
+          {view !== "member" && (
             <CreateProjectDialog
               open={createOpen}
               onOpenChange={setCreateOpen}
               name={newName}
               onNameChange={setNewName}
               onSubmit={handleCreate}
+              disabled={isDemo}
             />
           )}
         </div>
@@ -793,7 +794,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
                     <ProjectCard
                       key={project.id}
                       project={project}
-                      canEdit={canEditProject(project)}
+                      canEdit={canEditProject(project)} readOnly={isDemo}
                       onEdit={() => openEditProject(project)}
                       onDelete={() =>
                         openConfirm(
@@ -842,7 +843,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
                   <ProjectCard
                     key={project.id}
                     project={project}
-                    canEdit={canEditProject(project)}
+                    canEdit={canEditProject(project)} readOnly={isDemo}
                     onEdit={() => openEditProject(project)}
                     onDelete={() =>
                       openConfirm(

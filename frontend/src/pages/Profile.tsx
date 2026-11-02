@@ -13,7 +13,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
-    const { profile, refreshProfile, signOut } = useAuth();
+    const { profile, refreshProfile, signOut, isDemo } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -214,7 +214,7 @@ export default function Profile() {
                                             <span className="text-foreground">{createdAtLabel}</span>
                                         </div>
                                     </div>
-                                    <Button type="submit" disabled={savingProfile} className="w-full">
+                                    <Button type="submit" disabled={savingProfile || isDemo} className="w-full">
                                         {savingProfile ? "Saving..." : "Save Changes"}
                                     </Button>
                                 </form>
@@ -289,7 +289,7 @@ export default function Profile() {
                                             </Button>
                                         </div>
                                     </div>
-                                    <Button type="submit" disabled={savingPassword} className="w-full">
+                                    <Button type="submit" disabled={savingPassword || isDemo} className="w-full">
                                         {savingPassword ? "Updating..." : "Update Password"}
                                     </Button>
                                 </form>
@@ -312,7 +312,7 @@ export default function Profile() {
                                         variant="destructive"
                                         size="sm"
                                         onClick={() => setDeleteOpen(true)}
-                                        disabled={deletingAccount}
+                                        disabled={deletingAccount || isDemo}
                                     >
                                         {deletingAccount ? "Deleting..." : "Delete Account"}
                                     </Button>

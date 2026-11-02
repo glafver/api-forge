@@ -10,6 +10,7 @@ interface CreateProjectDialogProps {
     name: string;
     onNameChange: (value: string) => void;
     onSubmit: (event: React.FormEvent) => void;
+    disabled?: boolean;
 }
 
 export default function CreateProjectDialog({
@@ -18,12 +19,13 @@ export default function CreateProjectDialog({
     name,
     onNameChange,
     onSubmit,
+    disabled,
 }: CreateProjectDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button>
+                <Button disabled={disabled}>
                     <FolderPlus className="mr-2 h-4 w-4" />
                     New Project
                 </Button>

@@ -13,6 +13,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Database, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -95,6 +101,28 @@ const COUNTRIES = [
     "USA", "Germany", "Japan", "France", "Canada", "Australia", "Spain", "Italy",
 ];
 const COLORS = ["Red", "Blue", "Green", "Black", "White", "Yellow", "Purple", "Orange"];
+
+const SMART_PATTERNS: { field: string; example: string }[] = [
+    { field: "id, *_id, uuid, guid", example: "3f2b9c… (UUID)" },
+    { field: "email, mail", example: "alice.smith42@example.com" },
+    { field: "phone, mobile, tel", example: "+1-555-0184" },
+    { field: "first_name, firstname", example: "Alice" },
+    { field: "last_name, surname", example: "Smith" },
+    { field: "name, full_name", example: "Alice Smith" },
+    { field: "username, login, nickname", example: "alice42" },
+    { field: "price, cost, amount, total, salary", example: "327.64" },
+    { field: "product, item, title, goods", example: "Mechanical Keyboard" },
+    { field: "quantity, qty, count, stock", example: "42" },
+    { field: "age", example: "25" },
+    { field: "number, num, no", example: "4821" },
+    { field: "date, created, updated, birthday, born", example: "2026-04-15" },
+    { field: "url, website, site, link", example: "https://example.com/abc123" },
+    { field: "city, town", example: "Berlin" },
+    { field: "country", example: "Germany" },
+    { field: "address, street", example: "123 Smith St." },
+    { field: "zip, postal, postcode", example: "48210" },
+    { field: "color, colour", example: "Purple" },
+];
 
 function pick<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -457,6 +485,34 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
 
     return (
         <TabsContent value="seed" className="mt-4">
+            <Accordion type="single" collapsible className="mb-4">
+                <AccordionItem value="smart-fill">
+                    <AccordionTrigger className="text-sm font-medium">
+                        <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                        Smart filling — field names are detected automatically
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <p className="mb-2 text-xs text-muted-foreground">
+                            If a field name matches one of these patterns, a realistic value is generated.
+                            Otherwise a generic value based on the field type is used.
+                        </p>
+                        <div className="grid gap-1 sm:grid-cols-2">
+                            {SMART_PATTERNS.map((pattern) => (
+                                <div
+                                    key={pattern.field}
+                                    className="flex items-baseline justify-between gap-3 rounded px-2 py-1 text-sm odd:bg-muted/40"
+                                >
+                                    <span className="font-mono text-xs">{pattern.field}</span>
+                                    <span className="truncate text-xs text-muted-foreground">
+                                        {pattern.example}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+
             <div className="space-y-4">
                 {resources.map((resource) => {
                     const selectedFields = selected[resource.id] ?? new Set(resource.fields.map((field) => field.name));

@@ -12,6 +12,8 @@ Define a project, describe your models (resources) with typed fields, and ApiFor
 
 Built with **.NET 9** and **React + Vite + shadcn/ui**.
 
+![ApiForge — generated API with developer key and endpoints](docs/screenshot.png)
+
 ---
 
 ## ✨ Features

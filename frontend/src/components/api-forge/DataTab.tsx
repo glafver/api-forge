@@ -27,7 +27,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Database, Pencil, RefreshCw, Trash2 } from "lucide-react";
+import { Database, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface FieldResponse {
@@ -74,7 +74,6 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
     const [resources, setResources] = useState<Resource[]>([]);
     const [records, setRecords] = useState<Record<string, RecordRow[]>>({});
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const [confirm, setConfirm] = useState<ConfirmTarget | null>(null);
     const [editTarget, setEditTarget] = useState<{ resource: Resource; record: RecordRow } | null>(null);
     const [editValues, setEditValues] = useState<Record<string, string>>({});
@@ -161,12 +160,6 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
             load();
         }
     }, [active, load, refreshKey]);
-
-    const refresh = async () => {
-        setRefreshing(true);
-        await load();
-        setRefreshing(false);
-    };
 
     const deleteRecord = async (resource: Resource, recordId: string) => {
         try {
@@ -279,12 +272,6 @@ export default function DataTab({ projectId, refreshKey = 0, active = true }: Da
 
     return (
         <TabsContent value="data" className="mt-4">
-            <div className="mb-4 flex items-center justify-end">
-                <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
-                    <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-                    Refresh
-                </Button>
-            </div>
             <Accordion type="multiple" className="space-y-2">
                 {resources.map((resource) => {
                     const rows = records[resource.id] ?? [];

@@ -36,25 +36,63 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
   useEffect(() => {
-    const raw = localStorage.getItem(activeProjectsKey);
-    if (!raw) {
-      setActiveProjects([]);
-      return;
-    }
+    let isMounted = true;
 
-    try {
-      const parsed = JSON.parse(raw) as ActiveProject[];
-      const valid = Array.isArray(parsed)
-        ? parsed.filter((item) => item?.id && item?.name)
-        : [];
-      setActiveProjects(valid);
-      return;
-    } catch {
-      console.error("Failed to parse active projects from localStorage");
-    }
+    const loadActiveProjects = async () => {
+      const raw = localStorage.getItem(activeProjectsKey);
+      let stored: ActiveProject[] = [];
 
-    setActiveProjects([]);
-  }, [location.pathname]);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as ActiveProject[];
+          stored = Array.isArray(parsed)
+            ? parsed.filter((item) => item?.id && item?.name)
+            : [];
+        } catch {
+          console.error("Failed to parse active projects from localStorage");
+        }
+      }
+
+      // Prune projects that no longer exist (e.g. after a database reset).
+      try {
+        const response = await fetch(`${apiBase}/api/projects`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = (await response.json()) as { id?: string; Id?: string }[];
+          const validIds = new Set(
+            (data ?? []).map((p) => (p.id ?? p.Id ?? "").toLowerCase()),
+          );
+          const filtered = stored.filter((item) =>
+            validIds.has(item.id.toLowerCase()),
+          );
+
+          if (isMounted) {
+            setActiveProjects(filtered);
+          }
+
+          if (filtered.length === 0) {
+            localStorage.removeItem(activeProjectsKey);
+          } else if (filtered.length !== stored.length) {
+            localStorage.setItem(activeProjectsKey, JSON.stringify(filtered));
+          }
+          return;
+        }
+      } catch {
+        console.error("Failed to validate active projects against the server");
+      }
+
+      if (isMounted) {
+        setActiveProjects(stored);
+      }
+    };
+
+    loadActiveProjects();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBase, location.pathname]);
 
   useEffect(() => {
     if (!profile?.id) {

@@ -177,7 +177,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   };
 
   const handleCloseProject = (
-    event: MouseEvent<HTMLButtonElement>,
+    event: MouseEvent<HTMLElement>,
     projectId: string,
   ) => {
     event.preventDefault();
@@ -246,15 +246,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             >
               <Zap className="h-4 w-4" />
               <span className="flex-1 truncate">{project.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 shrink-0"
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label="Close project"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 onClick={(event) => handleCloseProject(event, project.id)}
-                title="Close project"
               >
                 <X className="h-3.5 w-3.5" />
-              </Button>
+              </span>
             </NavLink>
           ))}
         </nav>

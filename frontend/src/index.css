@@ -35,12 +35,8 @@
     --sidebar-accent-foreground: 239 60% 40%;
     --sidebar-border: 220 14% 91%;
     --sidebar-ring: 239 84% 67%;
-    --success: 152 60% 40%;
-    --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --surface: 0 0% 100%;
-    --surface-foreground: 220 20% 10%;
     --mono: 'JetBrains Mono', monospace;
   }
 
@@ -72,12 +68,8 @@
     --sidebar-accent-foreground: 239 84% 80%;
     --sidebar-border: 222 14% 16%;
     --sidebar-ring: 239 84% 72%;
-    --success: 152 60% 45%;
-    --success-foreground: 0 0% 100%;
     --warning: 38 92% 55%;
     --warning-foreground: 0 0% 0%;
-    --surface: 222 18% 14%;
-    --surface-foreground: 210 20% 92%;
   }
 }
 

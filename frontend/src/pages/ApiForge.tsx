@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Database } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +17,7 @@ interface Project {
 const activeProjectsKey = "activeProjects";
 
 export default function ApiForge() {
-  const { user } = useAuth();
+  const { profile: user } = useAuth();
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -203,39 +201,28 @@ export default function ApiForge() {
           </div>
         </div>
 
-        {!projectId ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Database className="mb-4 h-12 w-12 text-muted-foreground/50" />
-              <p className="text-muted-foreground">
-                Select a project to manage APIs.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="rounded-none inline-flex gap-2 border-b border-border bg-transparent p-0">
-              <TabsTrigger value="resources" className={tabTriggerClass}>
-                Resources
-              </TabsTrigger>
-              <TabsTrigger value="api" className={tabTriggerClass}>
-                API
-              </TabsTrigger>
-              <TabsTrigger value="seed" className={tabTriggerClass}>
-                Seed Data
-              </TabsTrigger>
-              <TabsTrigger value="data" className={tabTriggerClass}>
-                Data
-              </TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="rounded-none inline-flex gap-2 border-b border-border bg-transparent p-0">
+            <TabsTrigger value="resources" className={tabTriggerClass}>
+              Resources
+            </TabsTrigger>
+            <TabsTrigger value="api" className={tabTriggerClass}>
+              API
+            </TabsTrigger>
+            <TabsTrigger value="seed" className={tabTriggerClass}>
+              Seed Data
+            </TabsTrigger>
+            <TabsTrigger value="data" className={tabTriggerClass}>
+              Data
+            </TabsTrigger>
+          </TabsList>
 
-            <ResourcesTab projectId={projectId} onChanged={notifyResourcesChanged} />
+          <ResourcesTab projectId={projectId} onChanged={notifyResourcesChanged} />
 
-            <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
-            <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "seed"} />
-            <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "data"} />
-          </Tabs>
-        )}
+          <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+          <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "seed"} />
+          <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "data"} />
+        </Tabs>
       </motion.div>
     </div>
   );

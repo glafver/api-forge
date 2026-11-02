@@ -261,7 +261,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
         }
     };
 
-    const handleDeleteResource = async (resourceId: string, resourceName: string) => {
+    const handleDeleteResource = async (resourceId: string) => {
         if (!projectId) return;
 
         try {
@@ -288,7 +288,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
         }
     };
 
-    const handleDeleteField = async (resourceId: string, fieldId: string, fieldName: string) => {
+    const handleDeleteField = async (resourceId: string, fieldId: string) => {
         if (!projectId) return;
 
         try {
@@ -394,7 +394,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                 setConfirmTitle(`Delete /${resource.name}?`);
                                                 setConfirmDescription("This will permanently remove the resource.");
                                                 setConfirmLabel("Delete");
-                                                setConfirmAction(() => () => handleDeleteResource(resource.id, resource.name));
+                                                setConfirmAction(() => () => handleDeleteResource(resource.id));
                                                 setConfirmOpen(true);
                                             }}
                                         >
@@ -427,7 +427,7 @@ export default function ResourcesTab({ projectId, onChanged }: ResourcesTabProps
                                                         setConfirmTitle(`Delete field ${field.name}?`);
                                                         setConfirmDescription("This will permanently remove the field.");
                                                         setConfirmLabel("Delete");
-                                                        setConfirmAction(() => () => handleDeleteField(resource.id, field.id, field.name));
+                                                        setConfirmAction(() => () => handleDeleteField(resource.id, field.id));
                                                         setConfirmOpen(true);
                                                     }}
                                                 >

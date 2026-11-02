@@ -18,8 +18,6 @@ interface Profile {
 }
 
 interface AuthContextType {
-  user: Profile | null;
-  session: Session;
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
@@ -27,15 +25,11 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
 }
 
-type Session = { user: Profile } | null;
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<Profile | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session>(null);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -95,7 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true);
     try {
       const response = await fetch(`${apiBase}/api/user/login`, {
         method: "POST",
@@ -112,15 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data) {
         return { error: "Unexpected response from server" };
       }
-      const profileData = mapProfile(data);
-      setUser(profileData);
-      setProfile(profileData);
-      setSession({ user: profileData });
+      setProfile(mapProfile(data));
       return {};
     } catch (error) {
       return { error: error instanceof Error ? error.message : "Login failed" };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -133,9 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       console.error("Failed to log out");
     } finally {
-      setUser(null);
       setProfile(null);
-      setSession(null);
     }
   };
 
@@ -148,23 +134,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        setUser(null);
         setProfile(null);
-        setSession(null);
         return;
       }
 
       const data = await readJsonIfPossible(response);
       if (!data) {
-        setUser(null);
         setProfile(null);
-        setSession(null);
         return;
       }
-      const profileData = mapProfile(data);
-      setUser(profileData);
-      setProfile(profileData);
-      setSession({ user: profileData });
+      setProfile(mapProfile(data));
+    } catch {
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -177,8 +158,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
-        session,
         profile,
         loading,
         signIn,

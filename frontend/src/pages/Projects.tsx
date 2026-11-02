@@ -20,7 +20,7 @@ import CreateProjectDialog from "@/components/CreateProjectDialog";
 import ProjectCard from "@/components/ProjectCard";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
-export type ProjectsView = "all" | "owned" | "member";
+export type ProjectsView = "owned" | "member";
 
 interface Project {
   id: string;
@@ -52,8 +52,8 @@ interface UserSuggestion {
   email: string;
 }
 
-export default function Projects({ view = "all" }: { view?: ProjectsView }) {
-  const { user } = useAuth();
+export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
+  const { profile: user } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -667,17 +667,21 @@ export default function Projects({ view = "all" }: { view?: ProjectsView }) {
   const openApis = (projectId: string) => {
     const project = projects.find((item) => item.id === projectId);
     if (project) {
-      const raw = localStorage.getItem("activeProjects");
-      const parsed = raw
-        ? (JSON.parse(raw) as { id: string; name: string }[])
-        : [];
-      const next = Array.isArray(parsed)
-        ? parsed.filter((item) => item?.id && item?.name)
-        : [];
-      if (!next.some((item) => item.id === project.id)) {
-        next.push({ id: project.id, name: project.name });
+      try {
+        const raw = localStorage.getItem("activeProjects");
+        const parsed = raw
+          ? (JSON.parse(raw) as { id: string; name: string }[])
+          : [];
+        const next = Array.isArray(parsed)
+          ? parsed.filter((item) => item?.id && item?.name)
+          : [];
+        if (!next.some((item) => item.id === project.id)) {
+          next.push({ id: project.id, name: project.name });
+        }
+        localStorage.setItem("activeProjects", JSON.stringify(next));
+      } catch {
+        localStorage.removeItem("activeProjects");
       }
-      localStorage.setItem("activeProjects", JSON.stringify(next));
     }
     navigate(`/api-forge/${projectId}`);
   };

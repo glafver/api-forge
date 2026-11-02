@@ -429,21 +429,21 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                             onClick={() => {
                                 const resource = prompt;
                                 setPrompt(null);
-                                if (resource) seedNew(resource);
+                                if (resource) fillExisting(resource);
                             }}
                         >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Add new records
+                            Fill empty fields in existing records
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => {
                                 const resource = prompt;
                                 setPrompt(null);
-                                if (resource) fillExisting(resource);
+                                if (resource) seedNew(resource);
                             }}
                         >
-                            Fill empty fields in existing records
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Add new records
                         </Button>
                     </div>
                 </DialogContent>

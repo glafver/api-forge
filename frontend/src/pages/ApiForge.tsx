@@ -232,7 +232,7 @@ export default function ApiForge() {
             <ResourcesTab projectId={projectId} onChanged={notifyResourcesChanged} />
 
             <ApiTab projectId={projectId} refreshKey={resourcesRefreshKey} />
-            <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} />
+            <SeedTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "seed"} />
             <DataTab projectId={projectId} refreshKey={resourcesRefreshKey} active={activeTab === "data"} />
           </Tabs>
         )}

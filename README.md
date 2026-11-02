@@ -1,5 +1,11 @@
 # ⚡ ApiForge
 
+![.NET 9](https://img.shields.io/badge/.NET-9-512BD4?style=flat&logo=dotnet&logoColor=white)
+![React 18](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
+
 **ApiForge** is a self-hosted tool that turns your data models into a fully working REST API in seconds.
 
 Define a project, describe your models (resources) with typed fields, and ApiForge instantly generates a complete CRUD API — with pagination, sorting, filtering, an access key, and even smart seed data. No boilerplate, no code generation, just a running API.
@@ -150,6 +156,52 @@ Append `?key=…` to any generated endpoint to call it without logging in:
 
 ```bash
 curl "http://localhost:8080/api/projects/{projectId}/products?key=123456789"
+```
+
+---
+
+## 🧪 Worked example: a `products` API
+
+1. In the UI, create a project and add a model named `products` with three fields:
+   `name` (string), `price` (double), `in_stock` (int).
+
+2. Grab the developer key from the **API** tab, then create a record:
+
+```bash
+curl -X POST "http://localhost:8080/api/projects/{projectId}/products?key=123456789" \
+  -H "Content-Type: application/json" \
+  -d '{"recordFields":[{"name":"name","value":"Keyboard"},{"name":"price","value":"49.99"},{"name":"in_stock","value":"25"}]}'
+```
+
+3. List records, sorted by price (descending):
+
+```bash
+curl "http://localhost:8080/api/projects/{projectId}/products?key=123456789&page=1&pageSize=10&sort=price&order=desc"
+```
+
+```json
+{
+  "page": 1,
+  "pageSize": 10,
+  "totalCount": 1,
+  "totalPages": 1,
+  "items": [
+    {
+      "id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+      "fields": [
+        { "name": "name", "value": "Keyboard" },
+        { "name": "price", "value": "49.99" },
+        { "name": "in_stock", "value": "25" }
+      ]
+    }
+  ]
+}
+```
+
+4. Filter records where a field matches a value:
+
+```bash
+curl "http://localhost:8080/api/projects/{projectId}/products?key=123456789&in_stock=0"
 ```
 
 ---

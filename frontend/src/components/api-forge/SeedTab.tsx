@@ -100,72 +100,97 @@ function pick<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function isValidForType(value: string, type: string): boolean {
+    switch (type.toLowerCase()) {
+        case "int":
+            return /^-?\d+$/.test(value);
+        case "double":
+            return /^-?\d+(\.\d+)?$/.test(value);
+        case "bool":
+            return value === "true" || value === "false";
+        case "guid":
+            return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        default:
+            return true; // string accepts anything
+    }
+}
+
 function smartValue(name: string, type: string): string {
     const n = name.toLowerCase();
     const t = type.toLowerCase();
 
-    // IDs / UUIDs
-    if (n === "id" || n.endsWith("_id") || n.includes("uuid") || n.includes("guid")) {
-        return crypto.randomUUID();
-    }
+    const candidate = (() => {
+        // IDs / UUIDs
+        if (n === "id" || n.endsWith("_id") || n.includes("uuid") || n.includes("guid")) {
+            return crypto.randomUUID();
+        }
 
-    // Contact info
-    if (n.includes("email") || n.includes("mail")) {
-        return `${pick(FIRST_NAMES).toLowerCase()}.${pick(LAST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}@example.com`;
-    }
-    if (n.includes("phone") || n.includes("mobile") || n.includes("tel")) {
-        return `+1-555-01${Math.floor(Math.random() * 90) + 10}`;
-    }
+        // Contact info
+        if (n.includes("email") || n.includes("mail")) {
+            return `${pick(FIRST_NAMES).toLowerCase()}.${pick(LAST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}@example.com`;
+        }
+        if (n.includes("phone") || n.includes("mobile") || n.includes("tel")) {
+            return t === "int" || t === "double"
+                ? String(Math.floor(Math.random() * 900000000) + 100000000)
+                : `+1-555-01${Math.floor(Math.random() * 90) + 10}`;
+        }
 
-    // Names
-    if (n.includes("first_name") || n.includes("firstname")) return pick(FIRST_NAMES);
-    if (n.includes("last_name") || n.includes("lastname") || n.includes("surname")) return pick(LAST_NAMES);
-    if (n === "name" || n.includes("full_name") || n.includes("fullname")) {
-        return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
-    }
-    if (n.includes("username") || n.includes("login") || n.includes("nickname")) {
-        return `${pick(FIRST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}`;
-    }
+        // Names
+        if (n.includes("first_name") || n.includes("firstname")) return pick(FIRST_NAMES);
+        if (n.includes("last_name") || n.includes("lastname") || n.includes("surname")) return pick(LAST_NAMES);
+        if (n === "name" || n.includes("full_name") || n.includes("fullname")) {
+            return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+        }
+        if (n.includes("username") || n.includes("login") || n.includes("nickname")) {
+            return `${pick(FIRST_NAMES).toLowerCase()}${Math.floor(Math.random() * 90) + 10}`;
+        }
 
-    // Money
-    if (n.includes("price") || n.includes("cost") || n.includes("amount") || n.includes("total") || n.includes("salary")) {
-        const value = Math.random() * 1000;
-        return t === "int" ? String(Math.round(value)) : value.toFixed(2);
-    }
+        // Money
+        if (n.includes("price") || n.includes("cost") || n.includes("amount") || n.includes("total") || n.includes("salary")) {
+            const value = Math.random() * 1000;
+            return t === "int" ? String(Math.round(value)) : value.toFixed(2);
+        }
 
-    // Products / items
-    if (n.includes("product") || n.includes("item") || n.includes("title") || n.includes("goods")) {
-        return pick(PRODUCTS);
-    }
+        // Products / items
+        if (n.includes("product") || n.includes("item") || n.includes("title") || n.includes("goods")) {
+            return pick(PRODUCTS);
+        }
 
-    // Counts and numbers
-    if (n.includes("quantity") || n.includes("qty") || n.includes("count") || n.includes("stock")) {
-        return String(Math.floor(Math.random() * 100) + 1);
-    }
-    if (n === "age") return String(Math.floor(Math.random() * 60) + 18);
-    if (n.includes("number") || n.includes("num") || n === "no") {
-        return String(Math.floor(Math.random() * 9000) + 1000);
-    }
+        // Counts and numbers
+        if (n.includes("quantity") || n.includes("qty") || n.includes("count") || n.includes("stock")) {
+            return String(Math.floor(Math.random() * 100) + 1);
+        }
+        if (n === "age") return String(Math.floor(Math.random() * 60) + 18);
+        if (n.includes("number") || n.includes("num") || n === "no") {
+            return String(Math.floor(Math.random() * 9000) + 1000);
+        }
 
-    // Dates
-    if (n.includes("date") || n.includes("created") || n.includes("updated") || n.includes("birthday") || n.includes("born")) {
-        const d = new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 3600 * 1000));
-        return d.toISOString().slice(0, 10);
+        // Dates
+        if (n.includes("date") || n.includes("created") || n.includes("updated") || n.includes("birthday") || n.includes("born")) {
+            const d = new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 3600 * 1000));
+            return d.toISOString().slice(0, 10);
+        }
+
+        // Web
+        if (n.includes("url") || n.includes("website") || n.includes("site") || n.includes("link")) {
+            return `https://example.com/${Math.random().toString(36).slice(2, 8)}`;
+        }
+
+        // Location
+        if (n.includes("city") || n.includes("town")) return pick(CITIES);
+        if (n.includes("country")) return pick(COUNTRIES);
+        if (n.includes("address") || n.includes("street")) return `${Math.floor(Math.random() * 999) + 1} ${pick(LAST_NAMES)} St.`;
+        if (n.includes("zip") || n.includes("postal") || n.includes("postcode")) return String(Math.floor(Math.random() * 90000) + 10000);
+
+        // Misc
+        if (n.includes("color") || n.includes("colour")) return pick(COLORS);
+
+        return null;
+    })();
+
+    if (candidate !== null && isValidForType(candidate, t)) {
+        return candidate;
     }
-
-    // Web
-    if (n.includes("url") || n.includes("website") || n.includes("site") || n.includes("link")) {
-        return `https://example.com/${Math.random().toString(36).slice(2, 8)}`;
-    }
-
-    // Location
-    if (n.includes("city") || n.includes("town")) return pick(CITIES);
-    if (n.includes("country")) return pick(COUNTRIES);
-    if (n.includes("address") || n.includes("street")) return `${Math.floor(Math.random() * 999) + 1} ${pick(LAST_NAMES)} St.`;
-    if (n.includes("zip") || n.includes("postal") || n.includes("postcode")) return String(Math.floor(Math.random() * 90000) + 10000);
-
-    // Misc
-    if (n.includes("color") || n.includes("colour")) return pick(COLORS);
 
     // Fall back to type-based random value
     return randomValue(type);
@@ -516,8 +541,9 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                         <DialogTitle>Seed /{prompt?.name}</DialogTitle>
                         <DialogDescription>
                             This resource already has {prompt ? existingCounts[prompt.id] ?? 0 : 0} record
-                            {(prompt ? existingCounts[prompt.id] ?? 0 : 0) === 1 ? "" : "s"}. What would you
-                            like to do?
+                            {(prompt ? existingCounts[prompt.id] ?? 0 : 0) === 1 ? "" : "s"}.
+                            Fill empty fields in existing records (for a newly added field), or create new
+                            records.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">
@@ -539,7 +565,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                             }}
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
-                            Add new records
+                            Create new records
                         </Button>
                     </div>
                 </DialogContent>

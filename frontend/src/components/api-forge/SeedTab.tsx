@@ -14,12 +14,14 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Database, Sparkles } from "lucide-react";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Database, Info, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface FieldResponse {
@@ -232,6 +234,7 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
     const [loading, setLoading] = useState(true);
     const [seeding, setSeeding] = useState<Record<string, boolean>>({});
     const [prompt, setPrompt] = useState<Resource | null>(null);
+    const [guideOpen, setGuideOpen] = useState(false);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 
     const parseErrorMessage = async (response: Response) => {
@@ -485,33 +488,15 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
 
     return (
         <TabsContent value="seed" className="mt-4">
-            <Accordion type="single" collapsible className="mb-4">
-                <AccordionItem value="smart-fill">
-                    <AccordionTrigger className="text-sm font-medium">
-                        <Sparkles className="mr-2 h-4 w-4 text-primary" />
-                        Smart filling — field names are detected automatically
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className="mb-2 text-xs text-muted-foreground">
-                            If a field name matches one of these patterns, a realistic value is generated.
-                            Otherwise a generic value based on the field type is used.
-                        </p>
-                        <div className="grid gap-1 sm:grid-cols-2">
-                            {SMART_PATTERNS.map((pattern) => (
-                                <div
-                                    key={pattern.field}
-                                    className="flex items-baseline justify-between gap-3 rounded px-2 py-1 text-sm odd:bg-muted/40"
-                                >
-                                    <span className="font-mono text-xs">{pattern.field}</span>
-                                    <span className="truncate text-xs text-muted-foreground">
-                                        {pattern.example}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
+            <div className="mb-3 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                    Field names are detected to generate realistic values.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setGuideOpen(true)}>
+                    <Info className="mr-1 h-3.5 w-3.5" />
+                    Smart filling
+                </Button>
+            </div>
 
             <div className="space-y-4">
                 {resources.map((resource) => {
@@ -623,6 +608,38 @@ export default function SeedTab({ projectId, refreshKey = 0 }: SeedTabProps) {
                             <Sparkles className="mr-2 h-4 w-4" />
                             Create new records
                         </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={guideOpen} onOpenChange={setGuideOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Smart filling patterns</DialogTitle>
+                        <DialogDescription>
+                            If a field name matches one of these, a realistic value is generated.
+                            Otherwise a generic value based on the field type is used.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="font-mono text-xs">Field name</TableHead>
+                                    <TableHead className="text-xs">Example value</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {SMART_PATTERNS.map((pattern) => (
+                                    <TableRow key={pattern.field}>
+                                        <TableCell className="font-mono text-xs">{pattern.field}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {pattern.example}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </div>
                 </DialogContent>
             </Dialog>

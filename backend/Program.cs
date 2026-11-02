@@ -43,7 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiForge API v1"));
 }
 
-app.ApplyMigrationsOnRun();
+app.EnsureDatabaseCreated();
 
 // Seed Roles
 using (var scope = app.Services.CreateScope())

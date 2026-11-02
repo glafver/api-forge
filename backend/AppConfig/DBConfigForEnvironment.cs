@@ -25,12 +25,12 @@ public static class DBConfigForEnvironment
 
 
 
-            var connectionString = $"Server={db_server},1433;Database={db_name};User Id={id};Password={db_password};TrustServerCertificate=true;Encrypt=False";
-            services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
+            var connectionString = $"Host={db_server};Port=5432;Database={db_name};Username={id};Password={db_password}";
+            services.AddDbContext<ApplicationDBContext>(options => options.UseNpgsql(connectionString));
             return services;
         }
 
-        services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<ApplicationDBContext>(options => options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
         return services;
     }
 }

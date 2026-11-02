@@ -1,5 +1,3 @@
-version: "3.3"
-
 services:
   hpcdsystem:
     build:
@@ -15,27 +13,33 @@ services:
       RUNNING_IN_DOCKER: "true"
       DEV_KEY_SALT: ${DEV_KEY_SALT}
       ConnectionStrings__DefaultConnection: >
-        Server=${DB_SERVER}; Database=${DB_NAME}; User Id=${DB_ID}; Password=${DB_PASSWORD}; TrustServerCertificate=True; Encrypt=False
+        Host=${DB_SERVER};Port=5432;Database=${DB_NAME};Username=${DB_ID};Password=${DB_PASSWORD}
 
     # Persist DataProtection keys so auth cookies survive container recreation
     volumes:
       - data-protection:/root/.aspnet/DataProtection-Keys
 
     depends_on:
-      - apiForge-sqlserver
+      apiforge-postgres:
+        condition: service_healthy
 
-  apiForge-sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: apiForge-sqlserver
+  apiforge-postgres:
+    image: postgres:16-alpine
+    container_name: apiforge-postgres
     environment:
-      SA_PASSWORD: ${DB_PASSWORD}
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_ID}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserverdata:/var/opt/mssql
+      - postgresdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_ID} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
-  sqlserverdata:
+  postgresdata:
   data-protection:

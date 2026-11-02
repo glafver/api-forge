@@ -54,7 +54,7 @@ Built with **.NET 9** and **React + Vite + shadcn/ui**.
 
 | Layer     | Tech |
 |-----------|------|
-| Backend   | .NET 9, ASP.NET Core, Entity Framework Core, ASP.NET Identity + JWT, SQL Server |
+| Backend   | .NET 9, ASP.NET Core, Entity Framework Core, ASP.NET Identity + JWT, PostgreSQL |
 | Frontend  | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Framer Motion |
 | Infra     | Docker + Docker Compose |
 
@@ -80,11 +80,11 @@ cd api-forge
 Create a `.env` file in the project root (never commit it):
 
 ```dotenv
-# SQL Server credentials
+# PostgreSQL credentials
 DB_NAME=apiforge
 DB_PASSWORD=change-me
-DB_ID=sa
-DB_SERVER=apiForge-sqlserver
+DB_ID=postgres
+DB_SERVER=apiforge-postgres
 
 # Secret salt used to derive the daily developer key (keep it private)
 DEV_KEY_SALT=some-long-random-string
@@ -98,9 +98,9 @@ docker compose up -d --build
 
 This will:
 
-- start a SQL Server container (`apiForge-sqlserver`);
+- start a PostgreSQL container (`apiforge-postgres`);
 - build and start the app container (`api-forge-app`);
-- apply EF Core migrations and seed the default role automatically;
+- create the database schema and seed the default role automatically;
 - serve the app and API at **http://localhost:8080**.
 
 > Port 8080 in use by another project? Add a local `docker-compose.override.yml` (git-ignored) to remap the host port, e.g. `8095:8080`.
@@ -110,7 +110,7 @@ This will:
 ```bash
 docker compose stop          # stop all services
 docker stop api-forge-app    # stop just the app
-docker stop apiForge-sqlserver
+docker stop apiforge-postgres
 ```
 
 ---
@@ -119,10 +119,10 @@ docker stop apiForge-sqlserver
 
 | Variable        | Description |
 |-----------------|-------------|
-| `DB_NAME`       | SQL Server database name |
-| `DB_PASSWORD`   | SQL Server `sa` password |
-| `DB_ID`         | SQL Server login (usually `sa`) |
-| `DB_SERVER`     | SQL Server host (`apiForge-sqlserver` inside Docker) |
+| `DB_NAME`       | PostgreSQL database name |
+| `DB_PASSWORD`   | PostgreSQL password |
+| `DB_ID`         | PostgreSQL user (usually `postgres`) |
+| `DB_SERVER`     | PostgreSQL host (`apiforge-postgres` inside Docker) |
 | `DEV_KEY_SALT`  | Secret salt for the daily developer key |
 
 ---

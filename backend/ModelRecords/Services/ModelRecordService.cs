@@ -19,13 +19,13 @@ public class ModelRecordService : IModelRecordService
     private const int DefaultPageSize = 20;
     private const int MaxPageSize = 100;
 
-    private readonly IModelDefinitionService modelDefinitionService;
+    private readonly IDefinitionService modelDefinitionService;
     private readonly IModelRecordRepository repository;
     private readonly ApplicationDBContext dbContext;
 
     public ModelRecordService(
         IModelRecordRepository recordRepository,
-        IModelDefinitionService dataDefinitionService,
+        IDefinitionService dataDefinitionService,
         ApplicationDBContext applicationDbContext)
     {
         repository = recordRepository;
@@ -90,7 +90,7 @@ public class ModelRecordService : IModelRecordService
             return Failure<PagedRecordsResponseDto>($"Unknown sort field '{sortBy}'", 400);
         }
 
-        if (!string.IsNullOrWhiteSpace(sortOrder) && sortOrder is not ("asc" or "desc"))
+        if (!string.IsNullOrWhiteSpace(sortOrder) && sortOrder.ToLowerInvariant() is not ("asc" or "desc"))
         {
             return Failure<PagedRecordsResponseDto>("Sort order must be 'asc' or 'desc'", 400);
         }

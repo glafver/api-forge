@@ -14,16 +14,14 @@ namespace backend.ApplicationUser.Controller;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly IConfiguration _configuration;
     private readonly SignInManager<AppUser> _signInManager;
-    public UserController(IUserService userService, IConfiguration configuration, SignInManager<AppUser> signInManager)
+    public UserController(IUserService userService, SignInManager<AppUser> signInManager)
     {
         _userService = userService;
-        _configuration = configuration;
         _signInManager = signInManager;
     }
 
-    [HttpPost(Name = "Creates a new user")]
+    [HttpPost]
     [ProducesResponseType(typeof(AppUserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AppUserDto?>> Create([FromBody] UserCreateDto userDto)
@@ -54,18 +52,13 @@ public class UserController : ControllerBase
             return StatusCode(response.Error?.Status ?? StatusCodes.Status401Unauthorized, response.Error);
         }
 
-        if (response.Data.JwtToken is string token && response.Data.User is AppUserDto)
+        Response.Cookies.Append("access_token", response.Data.JwtToken, new CookieOptions
         {
-            Response.Cookies.Append("access_token", token, new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax
-            });
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax
+        });
 
-            return Ok(response.Data.User);
-        }
-
-        return Unauthorized();
+        return Ok(response.Data.User);
     }
 
     [HttpGet("info")]
@@ -105,16 +98,6 @@ public class UserController : ControllerBase
         }
 
         return Ok(res.Data);
-    }
-
-    [HttpGet("verify")]
-    [Authorize]
-    [ProducesResponseType(typeof(AppUserDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<AppUserDto>> UserVerify()
-    {
-        await Task.CompletedTask;
-        return Ok();
     }
 
     [HttpGet("search")]

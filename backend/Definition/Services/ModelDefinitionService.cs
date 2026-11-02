@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Definition.Service;
 
-public class ModelDefinitionService : IModelDefinitionService, IDefinitionService
+public class ModelDefinitionService : IDefinitionService
 {
     private readonly IDefinitionRepository repository;
     private readonly ApplicationDBContext dbContext;
@@ -51,6 +51,20 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
                     new OperationError($"Field name '{field.Name}' can only contain letters, digits and underscores (no spaces)", 400)
                 );
             }
+
+            if (!IsSupportedFieldType(field.Type))
+            {
+                return OperationResult<ModelDefinitionResponseDto>.Failure(
+                    new OperationError($"Field '{field.Name}' has unsupported type '{field.Type}'", 400)
+                );
+            }
+        }
+
+        if (dto.Fields.Select(f => f.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != dto.Fields.Count)
+        {
+            return OperationResult<ModelDefinitionResponseDto>.Failure(
+                new OperationError("Field names must be unique within a model", 400)
+            );
         }
 
         // Model names map directly to the generated endpoint route (api/projects/{projectId}/{name}),
@@ -65,11 +79,6 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
 
         var newModelDefinition = DefinitionFactory.FromModelDefinitionCreateDto(projectId, dto);
         var result = await repository.AddAsync(newModelDefinition);
-
-        if (result is null)
-        {
-            return OperationResult<ModelDefinitionResponseDto>.Failure(new OperationError("Category creation failed", 400));
-        }
 
         var response = DefinitionFactory.FromModelDefinitionEntity(result);
         return OperationResult<ModelDefinitionResponseDto>.Success(response);
@@ -132,19 +141,24 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
 
         try
         {
+            // Verify the field belongs to this model before deleting anything,
+            // so a field id from another model cannot wipe its values.
+            var field = await dbContext.Fields
+                .FirstOrDefaultAsync(f => f.Id == fieldId && f.ModelId == definitionId);
+
+            if (field is null)
+            {
+                return OperationResult<bool>.Failure(new OperationError("Field not found", 404));
+            }
+
             // Delete the values that reference this field first (FieldValue.FieldId is Restrict).
             await dbContext.FieldValues
                 .Where(value => value.FieldId == fieldId)
                 .ExecuteDeleteAsync();
 
-            var deleted = await dbContext.Fields
-                .Where(field => field.Id == fieldId && field.ModelId == definitionId)
+            await dbContext.Fields
+                .Where(f => f.Id == fieldId)
                 .ExecuteDeleteAsync();
-
-            if (deleted == 0)
-            {
-                return OperationResult<bool>.Failure(new OperationError("Field not found", 404));
-            }
 
             return OperationResult<bool>.Success(true);
         }
@@ -177,6 +191,22 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
         {
             return OperationResult<FieldDefinitionResponseDto>.Failure(
                 new OperationError("Field name can only contain letters, digits and underscores (no spaces), and must start with a letter or underscore", 400)
+            );
+        }
+
+        if (!IsSupportedFieldType(dto.Type))
+        {
+            return OperationResult<FieldDefinitionResponseDto>.Failure(
+                new OperationError($"Field '{dto.Name}' has unsupported type '{dto.Type}'", 400)
+            );
+        }
+
+        var fieldNameExists = await dbContext.Fields
+            .AnyAsync(f => f.ModelId == definitionId && f.Name == dto.Name);
+        if (fieldNameExists)
+        {
+            return OperationResult<FieldDefinitionResponseDto>.Failure(
+                new OperationError($"Field '{dto.Name}' already exists on this model", 409)
             );
         }
 
@@ -244,6 +274,13 @@ public class ModelDefinitionService : IModelDefinitionService, IDefinitionServic
     }
 
     private static readonly string[] ReservedModelNames = ["definitions", "members", "invitations"];
+
+    private static readonly string[] SupportedFieldTypes = ["string", "int", "double", "bool", "guid"];
+
+    private static bool IsSupportedFieldType(string type)
+    {
+        return SupportedFieldTypes.Contains(type, StringComparer.OrdinalIgnoreCase);
+    }
 
     private static bool IsReservedModelName(string name)
     {

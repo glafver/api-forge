@@ -40,13 +40,13 @@ internal class UserService : IUserService
     public async Task<OperationResult<AppUserDto>> CreateAsync(UserCreateDto dto)
     {
         var existingByEmail = await userManager.FindByEmailAsync(dto.Email);
-        if (existingByEmail is AppUser)
+        if (existingByEmail is not null)
         {
             return OperationResult<AppUserDto>.Failure(new OperationError(Message: "Email is already in use", Status: 400));
         }
 
         var existingByUsername = await userManager.FindByNameAsync(dto.Username);
-        if (existingByUsername is AppUser)
+        if (existingByUsername is not null)
         {
             return OperationResult<AppUserDto>.Failure(new OperationError(Message: "Username is already in use", Status: 400));
         }
@@ -312,9 +312,14 @@ internal class UserService : IUserService
         var audience = jwtSection["Audience"];
         var expiryMinutes = jwtSection.GetValue<int>("ExpiryMinutes", 60);
 
-        if (key is null || user.Email is null)
+        if (key is null)
         {
             throw new InvalidOperationException("JWT Key is not configured.");
+        }
+
+        if (user.Email is null)
+        {
+            throw new InvalidOperationException("User email is missing.");
         }
 
         var keyBytes = Encoding.UTF8.GetBytes(key);

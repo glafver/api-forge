@@ -306,6 +306,7 @@ internal class ProjectService : IProjectService
     )
     {
         var project = await _dbContext.Projects
+            .Include(p => p.Members)
             .FirstOrDefaultAsync(p => p.Id == projectId);
 
         if (project is null)
@@ -340,6 +341,7 @@ internal class ProjectService : IProjectService
     public async Task<OperationResult<bool>> CancelInvitationAsync(string userId, Guid projectId, Guid invitationId)
     {
         var project = await _dbContext.Projects
+            .Include(p => p.Members)
             .FirstOrDefaultAsync(p => p.Id == projectId);
 
         if (project is null)

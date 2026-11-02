@@ -13,6 +13,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       RUNNING_IN_DOCKER: "true"
+      DEV_KEY_SALT: ${DEV_KEY_SALT}
       ConnectionStrings__DefaultConnection: >
         Server=${DB_SERVER}; Database=${DB_NAME}; User Id=${DB_ID}; Password=${DB_PASSWORD}; TrustServerCertificate=True; Encrypt=False
 

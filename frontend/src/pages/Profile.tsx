@@ -28,7 +28,7 @@ export default function Profile() {
     const [deletingAccount, setDeletingAccount] = useState(false);
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
     const tabTriggerClass =
-        "rounded-b-none text-xs border border-border bg-muted/10 px-5 py-2 font-semibold text-muted-foreground shadow-sm data-[state=active]:bg-white data-[state=active]:text-foreground";
+        "rounded-b-none text-xs border border-border bg-muted/10 px-5 py-2 font-semibold text-muted-foreground shadow-sm data-[state=active]:bg-card data-[state=active]:text-foreground";
 
     useEffect(() => {
         setUsername(profile?.username ?? "");

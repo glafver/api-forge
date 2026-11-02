@@ -40,9 +40,9 @@ interface ApiTabProps {
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
 const methodColors: Record<Method, string> = {
-    GET: "bg-emerald-500/15 text-emerald-600",
-    POST: "bg-blue-500/15 text-blue-600",
-    PUT: "bg-amber-500/15 text-amber-600",
+    GET: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+    POST: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+    PUT: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
     DELETE: "bg-destructive/15 text-destructive",
 };
 

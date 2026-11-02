@@ -51,8 +51,8 @@ const fieldTypeColors: Record<string, string> = {
     string: "bg-accent text-accent-foreground",
     int: "bg-primary/10 text-primary",
     double: "bg-warning/10 text-warning",
-    bool: "bg-emerald-500/10 text-emerald-600",
-    guid: "bg-purple-500/10 text-purple-600",
+    bool: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    guid: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
 };
 
 const RESERVED_NAMES = ["definitions", "members", "invitations"];

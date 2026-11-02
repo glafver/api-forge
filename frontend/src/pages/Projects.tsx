@@ -703,7 +703,7 @@ export default function Projects({ view = "owned" }: { view?: ProjectsView }) {
     setConfirmOpen(true);
   };
   const tabTriggerClass =
-    "rounded-b-none text-xs border border-border bg-muted/10 px-5 py-2 font-semibold text-muted-foreground shadow-sm data-[state=active]:bg-white data-[state=active]:text-foreground";
+    "rounded-b-none text-xs border border-border bg-muted/10 px-5 py-2 font-semibold text-muted-foreground shadow-sm data-[state=active]:bg-card data-[state=active]:text-foreground";
 
   return (
     <div className="p-8">

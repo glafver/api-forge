@@ -1,3 +1,4 @@
+import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -74,14 +75,16 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <TooltipProvider>
-    <Sonner />
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
-  </TooltipProvider>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <TooltipProvider>
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </ThemeProvider>
 );
 
 export default App;

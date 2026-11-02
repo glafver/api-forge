@@ -9,9 +9,12 @@ import {
   LogOut,
   User,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 interface ActiveProject {
   id: string;
@@ -27,6 +30,7 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { profile, signOut } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([]);
@@ -205,6 +209,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <span className="text-lg font-bold text-sidebar-foreground">
             API Forge
           </span>
+          <button
+            type="button"
+            aria-label="Toggle theme"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          >
+            <Sun className="h-4 w-4 dark:hidden" />
+            <Moon className="hidden h-4 w-4 dark:block" />
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">

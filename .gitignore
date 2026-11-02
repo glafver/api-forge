@@ -23,3 +23,7 @@ backend.Tests/obj
 docker-compose.override.yml
 .env*
 data-protection/
+
+# Neon agent skills (machine-generated tooling)
+.agents/
+skills-lock.json

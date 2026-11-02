@@ -33,7 +33,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
 
     return (
-        <Card key={project.id} className="group transition-colors hover:border-primary/30">
+        <Card className="group transition-colors hover:border-primary/30">
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{project.name}</CardTitle>
